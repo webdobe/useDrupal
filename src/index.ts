@@ -29,5 +29,5 @@ export {
   useDrupalCartToken,
   useDrupalCustomerProfiles,
   useDrupalCheckoutFlow,
-  useDrupalRestApi,
+  useDrupalRestApi
 }

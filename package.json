@@ -1,6 +1,6 @@
 {
   "name": "usedrupal",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "useDrupal attempts to make it easier to create a headless drupal & drupal commerce frontend using react.",
   "main": "index.ts",
   "scripts": {
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/webdobe/useDrupal#readme",
   "devDependencies": {
+    "ts-loader": "^9.4.2",
     "typescript": "^5.0.4"
   },
   "dependencies": {

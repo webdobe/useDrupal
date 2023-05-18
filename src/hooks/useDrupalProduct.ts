@@ -3,16 +3,13 @@ import { useDrupalJsonApi } from "./useDrupalJsonApi";
 import { isUuid } from "../helpers";
 import DrupalEntity, {IEntityData} from "../service/DrupalEntity";
 
-type ProductPath = string[];
-type Includes = string[];
-
-interface Product {
+interface IProduct {
   isLoading: boolean;
   product: DrupalEntity | null;
   error: Error | null;
 }
 
-export const useDrupalProduct = (path: ProductPath, includes: Includes = []): Product => {
+export const useDrupalProduct = (path: string[], includes: string[] = []): IProduct => {
   const jsonapi = useDrupalJsonApi();
   const [bundle, setBundle] = useState<string | null>(null);
   const [entity, setEntity] = useState<DrupalEntity | null>(null);

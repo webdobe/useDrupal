@@ -12,6 +12,7 @@ import {useDrupalProduct} from "./hooks/useDrupalProduct";
 import {useDrupalRestApi} from "./hooks/useDrupalRestApi";
 import {useDrupalSearchApi} from "./hooks/useDrupalSearchApi";
 import {useDrupalUser} from "./hooks/useDrupalUser";
+import {useDrupalCarts} from "./hooks/useDrupalCarts";
 
 export {
   DrupalEntity,
@@ -19,6 +20,7 @@ export {
   DrupalLoadDefaults,
   useDrupal,
   useDrupalUser,
+  useDrupalCarts,
   useDrupalJsonApi,
   useDrupalSearchApi,
   useDrupalProduct,

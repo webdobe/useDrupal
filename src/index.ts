@@ -2,7 +2,6 @@ import DrupalEntity from "./service/DrupalEntity";
 import {useDrupal, DrupalProvider, DrupalLoadDefaults} from "./hooks/useDrupal";
 import {useDrupalJsonApi} from "./hooks/useDrupalJsonApi";
 import {useDrupalCartToken} from "./hooks/useDrupalCartToken";
-import {useClient} from "./hooks/useClient";
 import {useCsrfToken} from "./hooks/useCsrfToken";
 import {useDrupalCartLineItem} from "./hooks/useDrupalCartLineItem";
 import {useDrupalCheckout} from "./hooks/useDrupalCheckout";
@@ -27,7 +26,6 @@ export {
   useDrupalCheckout,
   useDrupalCartLineItem,
   useCsrfToken,
-  useClient,
   useDrupalCartToken,
   useDrupalCustomerProfiles,
   useDrupalCheckoutFlow,

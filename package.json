@@ -1,8 +1,8 @@
 {
   "name": "usedrupal",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "useDrupal attempts to make it easier to create a headless drupal & drupal commerce frontend using react.",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"

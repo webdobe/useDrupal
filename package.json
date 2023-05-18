@@ -1,0 +1,29 @@
+{
+  "name": "usedrupal",
+  "version": "1.0.0",
+  "description": "useDrupal attempts to make it easier to create a headless drupal & drupal commerce frontend using react.",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webdobe/useDrupal.git"
+  },
+  "keywords": [
+    "drupal",
+    "reactjs",
+    "commerce_api",
+    "drupal",
+    "commerce"
+  ],
+  "author": "Jesse Longacre",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/webdobe/useDrupal/issues"
+  },
+  "homepage": "https://github.com/webdobe/useDrupal#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}

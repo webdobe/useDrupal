@@ -1,6 +1,6 @@
 import { useDrupal } from "./useDrupal";
 
-const useDrupalRestApi = (clientConfig) => {
+export const useDrupalRestApi = (clientConfig) => {
   const { client } = useDrupal();
 
   let config = {
@@ -59,5 +59,3 @@ const useDrupalRestApi = (clientConfig) => {
     deleteUser,
   };
 };
-
-export default useDrupalRestApi;

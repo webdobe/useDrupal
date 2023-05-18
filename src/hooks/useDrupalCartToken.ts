@@ -2,7 +2,7 @@
 import {useEffect, useState} from "react";
 import {isBrowser} from "../helpers";
 
-export const useCartToken = (): string => {
+export const useDrupalCartToken = (): string => {
   const [cartToken, setCartToken] = useState('');
 
   useEffect(() => {

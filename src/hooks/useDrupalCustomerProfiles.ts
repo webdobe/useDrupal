@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useCartToken } from "./useCartToken";
+import { useDrupalCartToken } from "./useDrupalCartToken";
 import { useDrupal } from "./useDrupal";
 import { useDrupalJsonApi } from "./useDrupalJsonApi";
 
@@ -20,7 +20,7 @@ interface IErrorResponse {
 }
 
 export const useDrupalCustomerProfiles = () => {
-  const cartToken = useCartToken();
+  const cartToken = useDrupalCartToken();
   const { drupalState, setDrupalState } = useDrupal();
   const [isLoading, setIsLoading] = useState(false);
   const jsonApi = useDrupalJsonApi({

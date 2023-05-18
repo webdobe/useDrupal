@@ -1,4 +1,4 @@
-import { useCartToken } from "./useCartToken";
+import { useDrupalCartToken } from "./useDrupalCartToken";
 import { getOrder } from "../helpers";
 import { useDrupal } from "./useDrupal";
 import { useDrupalJsonApi, ApiResponse } from "./useDrupalJsonApi";
@@ -26,7 +26,7 @@ export const useDrupalCheckout = (includes: string[] = [
   "order_items.purchased_entity.product_id",
   "order_items.purchased_entity.product_id.product_type",
 ]) => {
-  const cartToken = useCartToken();
+  const cartToken = useDrupalCartToken();
   const { drupalState: { cart }, setDrupalState } = useDrupal();
   const jsonApi = useDrupalJsonApi({
     headers: {

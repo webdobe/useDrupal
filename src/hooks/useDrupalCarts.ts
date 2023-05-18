@@ -2,7 +2,7 @@
 import {useState} from "react";
 
 // Import custom hooks and utilities
-import {useCartToken} from "./useCartToken";
+import {useDrupalCartToken} from "./useDrupalCartToken";
 import {stringify} from "../helpers";
 import {useDrupal} from "./useDrupal";
 import {useDrupalJsonApi} from "./useDrupalJsonApi";
@@ -29,7 +29,7 @@ interface IApiData {
 
 // Define the useDrupalCarts hook with an optional orderType parameter
 export const useDrupalCarts = (orderType = "order--default") => {
-  const cartToken = useCartToken();
+  const cartToken = useDrupalCartToken();
   const {drupalState, setDrupalState} = useDrupal();
   const [isLoading, setIsLoading] = useState(false);
   const jsonApi = useDrupalJsonApi({

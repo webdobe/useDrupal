@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {isBrowser} from "../helpers";
 
-export const useLogoutToken = () => {
+export const useDrupalLogoutToken = () => {
   const [logoutToken, _setLogoutToken] = useState<string>('');
 
   const setLogoutToken = (token: string | null | undefined) => {

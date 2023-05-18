@@ -1,6 +1,6 @@
 import { useDrupal } from "./useDrupal";
-import { useCsrfToken } from "./useCsrfToken";
-import { useLogoutToken } from "./useLogoutToken";
+import { useDrupalCsrfToken } from "./useDrupalCsrfToken";
+import { useDrupalLogoutToken } from "./useDrupalLogoutToken";
 import {ApiResponse, useDrupalJsonApi} from "./useDrupalJsonApi";
 
 interface UserResponse {
@@ -20,8 +20,8 @@ interface MetaData {
 const defaultUser = {}
 
 export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_profiles']) => {
-  const [, setCsrfToken] = useCsrfToken();
-  const [logoutToken, setLogoutToken] = useLogoutToken();
+  const [, setCsrfToken] = useDrupalCsrfToken();
+  const [logoutToken, setLogoutToken] = useDrupalLogoutToken();
   const {client, setDrupalState} = useDrupal();
   const jsonapi = useDrupalJsonApi();
 

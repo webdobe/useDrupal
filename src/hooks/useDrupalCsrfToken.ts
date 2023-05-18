@@ -2,7 +2,7 @@
 import {useEffect, useState} from "react";
 import {isBrowser} from "../helpers";
 
-export const useCsrfToken = () => {
+export const useDrupalCsrfToken = () => {
   const [csrfToken, _setCsrfToken] = useState<string>('');
 
   const setCsrfToken = (token: string) => { // define type for token

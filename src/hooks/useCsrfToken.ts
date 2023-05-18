@@ -1,20 +1,23 @@
 //----------Libraries-----------//
 import {useEffect, useState} from "react";
+import {isBrowser} from "../helpers";
 
 export const useCsrfToken = () => {
   const [csrfToken, _setCsrfToken] = useState<string>('');
 
-  const setCsrfToken = (token) => {
+  const setCsrfToken = (token: string) => { // define type for token
     _setCsrfToken(() => {
-      localStorage.setItem("csrfToken", token);
+      window.localStorage.setItem("csrfToken", token);
       return token;
     });
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      let token: string = localStorage.getItem("csrfToken");
-      setCsrfToken(token);
+    if (isBrowser()) {
+      let token: string | null = window.localStorage.getItem("csrfToken"); // assign type string | null
+      if (token !== null) { // check if token is not null before setting
+        setCsrfToken(token);
+      }
     }
   }, []);
 

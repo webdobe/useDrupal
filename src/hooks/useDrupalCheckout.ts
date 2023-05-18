@@ -1,11 +1,20 @@
-// Import custom hooks and utilities
-import {useCartToken} from "./useCartToken";
-import {getOrder} from "../helpers";
-import {useDrupal} from "./useDrupal";
-import {useDrupalJsonApi} from "./useDrupalJsonApi";
+import { useCartToken } from "./useCartToken";
+import { getOrder } from "../helpers";
+import { useDrupal } from "./useDrupal";
+import { useDrupalJsonApi, ApiResponse } from "./useDrupalJsonApi";
 
-// Define the useDrupalCheckout hook with an optional includes parameter
-export const useDrupalCheckout = (includes = [
+interface ResponseData {
+  message?: string;
+}
+
+interface DrupalResponse<T = unknown> extends ApiResponse<T> {
+  response?: { data?: ResponseData; };
+  error?: Error;
+}
+
+type PatchData = { [key: string]: any };
+
+export const useDrupalCheckout = (includes: string[] = [
   "uid",
   "order_type",
   "store_id",
@@ -18,7 +27,7 @@ export const useDrupalCheckout = (includes = [
   "order_items.purchased_entity.product_id.product_type",
 ]) => {
   const cartToken = useCartToken();
-  const {drupalState: {cart}, setDrupalState} = useDrupal();
+  const { drupalState: { cart }, setDrupalState } = useDrupal();
   const jsonApi = useDrupalJsonApi({
     headers: {
       Accept: "application/vnd.api+json",
@@ -27,66 +36,45 @@ export const useDrupalCheckout = (includes = [
     },
   });
 
-  // Function to start the checkout process
-  const startCheckout = async () => {
+  const startCheckout = async (): Promise<DrupalResponse | null> => {
     try {
       const order = getOrder(cart);
-
       const response = await jsonApi.fetch(`/jsonapi/checkout/${order.id}`, {
         include: includes.join(","),
       });
 
-      if (response.data) {
-        setDrupalState({cart: response.data});
-        console.log("Start Checkout: ", response.data);
+      if (response && response.data) {
+        setDrupalState({ cart: response.data });
       }
 
       return response;
     } catch (error) {
-      console.error("Error starting checkout:", error);
-
-      if (error && error?.response?.data?.message) {
-        return { error: error?.response?.data };
-      }
-
-      return null;
+      return { error: error instanceof Error ? error : new Error("An error starting checkout.") };
     }
   };
 
-  // Function to update the checkout data
-  const updateCheckout = async (patchData) => {
+  const updateCheckout = async (patchData: PatchData): Promise<DrupalResponse | null> => {
     try {
       const order = getOrder(cart);
       const url = `/jsonapi/checkout/${order.id}?include=${includes.join(",")}`;
-      const response = await jsonApi.patch(url, {data: patchData});
+      const response = await jsonApi.patch(url, { data: patchData });
 
-      if (response.data) {
-        setDrupalState({cart: response.data});
-        console.log("Update Checkout: ", response.data);
+      if (response && response.data) {
+        setDrupalState({ cart: response.data });
       }
 
       return response;
     } catch (error) {
-      console.error("Error updating checkout:", error);
-
-      if (error && error?.response?.data?.message) {
-        return { error: error?.response?.data };
-      }
-
-      return null;
+      return { error: error instanceof Error ? error : new Error("An error occurred updating checkout.") };
     }
   };
 
-  // Function to start the checkout process
-  const placeOrder = async () => {
+  const placeOrder = async (): Promise<DrupalResponse | null> => {
     try {
       const order = getOrder(cart);
 
       const response = await jsonApi.post(`/jsonapi/checkout/${order.id}/payment`, {
         data: {
-          // This should be adapted based on the expected payment type.
-          // For example, for a "manual" payment, the type should be:
-          // 'payment--payment-manual'.
           type: 'payment--acceptjs',
           attributes: {
             capture: true
@@ -94,29 +82,19 @@ export const useDrupalCheckout = (includes = [
         }
       });
 
-      if (response.data) {
-        setDrupalState({cart: response.data});
-        console.log("Place order: ", response.data);
+      if (response && response.data) {
+        setDrupalState({ cart: response.data });
       }
 
       return response;
     } catch (error) {
-      console.error("Error placing order:", error);
-
-      if (error && error?.response?.data?.message) {
-        return { error: error?.response?.data };
-      }
-
-      return null;
+      return { error: error instanceof Error ? error : new Error("An error occurred placing order.") };
     }
   };
 
-  // Expose the necessary functions and data
-  const checkout = {
+  return {
     startCheckout,
     updateCheckout,
     placeOrder,
   };
-
-  return checkout
 }

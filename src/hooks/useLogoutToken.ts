@@ -1,16 +1,17 @@
-//----------Libraries-----------//
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import {isBrowser} from "../helpers";
 
 export const useLogoutToken = () => {
   const [logoutToken, _setLogoutToken] = useState<string>('');
 
   const setLogoutToken = (token: string | null | undefined) => {
-    localStorage.setItem("logoutToken", token);
-    _setLogoutToken(token);
+    const finalToken = token ?? '';
+    localStorage.setItem("logoutToken", finalToken);
+    _setLogoutToken(finalToken);
   }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (isBrowser()) {
       let token = localStorage.getItem("logoutToken");
       setLogoutToken(token);
     }
@@ -18,3 +19,4 @@ export const useLogoutToken = () => {
 
   return [logoutToken, setLogoutToken] as const;
 };
+

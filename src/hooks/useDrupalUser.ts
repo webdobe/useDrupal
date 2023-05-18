@@ -1,8 +1,21 @@
 import { useDrupal } from "./useDrupal";
 import { useCsrfToken } from "./useCsrfToken";
 import { useLogoutToken } from "./useLogoutToken";
-import { useEffect } from "react";
-import { useDrupalJsonApi } from "./useDrupalJsonApi";
+import {ApiResponse, useDrupalJsonApi} from "./useDrupalJsonApi";
+
+interface UserResponse {
+  "user--user"?: Record<string, any>
+}
+
+interface MetaData {
+  links?: {
+    me?: {
+      meta?: {
+        id?: string
+      }
+    }
+  }
+}
 
 const defaultUser = {}
 
@@ -23,16 +36,16 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     config = {...config, ...clientConfig};
   }
 
-  const setUserProfile = async (id) => {
+  const setUserProfile = async (id: any) => {
     try {
       const include = includes.join(',');
-      const { data } = await jsonapi.fetch(`/jsonapi/user/user/${id}?include=${include}`);
+      const response: ApiResponse<UserResponse> = await jsonapi.fetch(`/jsonapi/user/user/${id}?include=${include}`);
 
-      if (data && data["user--user"]) {
-        setDrupalState({user: data["user--user"][id]});
+      if (response.data && response.data["user--user"]) {
+        setDrupalState({ user: response.data["user--user"][id] });
       }
 
-      return data;
+      return response.data;
     } catch (error) {
       console.error('Error setting user profile:', error);
       return null;
@@ -41,27 +54,27 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
 
   const currentUser = async () => {
     try {
-      const { data: { meta }} = await client.get(`/jsonapi`);
-      if (meta) {
-        await setUserProfile(meta?.links?.me?.meta?.id);
+      const response: ApiResponse<{ meta: MetaData }> = await client.get(`/jsonapi`);
+      if (response.data?.meta?.links?.me?.meta?.id) {
+        await setUserProfile(response.data.meta.links.me.meta.id);
       } else {
         setDrupalState({user: defaultUser});
       }
-      return meta;
+      return response.data?.meta;
     } catch (error) {
       console.error('Error fetching current user data:', error);
       return null;
     }
   };
 
-  const login = async (loginData) => {
+  const login = async (loginData: any) => {
     try {
       const response = await client.post(`/user/login?_format=json`, loginData, config);
       setCsrfToken(response?.data?.csrf_token);
       setLogoutToken(response?.data?.logout_token);
       await currentUser();
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user data:', error);
 
       if (error && error?.response?.data?.message) {
@@ -72,7 +85,7 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
   };
 
-  const logout = async (token) => {
+  const logout = async (token: any) => {
     try {
       const response = await client.post(`/user/logout?_format=json&token=${token}`);
     } catch (error) {
@@ -80,12 +93,12 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
 
     // Logout regardless on frontend.
-    setCsrfToken(null);
-    setLogoutToken(null);
-    setDrupalState({user: null, cart: null});
+    setCsrfToken(null as unknown as string);
+    setLogoutToken(null as unknown as string);
+    setDrupalState({ user: null, cart: null });
   }
 
-  const createUser = async (userData) => {
+  const createUser = async (userData: any) => {
     try {
       const response = await client.post(`/user/register?_format=json`, userData, config);
       return response.data;
@@ -95,7 +108,7 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
   };
 
-  const resetPassword = async (userData) => {
+  const resetPassword = async (userData: any) => {
     try {
       const response = await client.post(`/user/password?_format=json`, userData, config);
       return response.data;
@@ -105,7 +118,7 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
   };
 
-  const updateUser = async (userId, userData) => {
+  const updateUser = async (userId: string, userData: any) => {
     try {
       const response = await client.patch(`/user/${userId}?_format=json`, userData, config);
       return response.data;
@@ -115,7 +128,7 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
   };
 
-  const deleteUser = async (userId) => {
+  const deleteUser = async (userId: string) => {
     try {
       await client.delete(`/user/${userId}?_format=json`, config);
     } catch (error) {

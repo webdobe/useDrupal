@@ -4,7 +4,14 @@ import isNull from 'lodash/isNull';
 import keys from 'lodash/keys';
 import merge from 'lodash/merge';
 
-function wrap(json) {
+type NormalizeOptions = {
+  filterEndpoint?: boolean,
+  camelizeKeys?: boolean,
+  camelizeTypeValues?: boolean,
+  endpoint?: string
+}
+
+function wrap(json: any): any[] {
   if (isArray(json)) {
     return json;
   }
@@ -12,11 +19,11 @@ function wrap(json) {
   return [json];
 }
 
-function isDate(attributeValue) {
+function isDate(attributeValue: any): boolean {
   return Object.prototype.toString.call(attributeValue) === '[object Date]';
 }
 
-function camelizeNestedKeys(attributeValue) {
+function camelizeNestedKeys(attributeValue: any): any {
   if (attributeValue === null || typeof attributeValue !== 'object' || isDate(attributeValue)) {
     return attributeValue;
   }
@@ -25,7 +32,7 @@ function camelizeNestedKeys(attributeValue) {
     return attributeValue.map(camelizeNestedKeys);
   }
 
-  const copy = {};
+  const copy: any = {};
 
   keys(attributeValue).forEach((k) => {
     copy[camelCase(k)] = camelizeNestedKeys(attributeValue[k]);
@@ -34,8 +41,8 @@ function camelizeNestedKeys(attributeValue) {
   return copy;
 }
 
-function extractRelationships(relationships, { camelizeKeys, camelizeTypeValues }) {
-  const ret = {};
+function extractRelationships(relationships: any, { camelizeKeys, camelizeTypeValues }: NormalizeOptions): any {
+  const ret: any = {};
   keys(relationships).forEach((key) => {
     const relationship = relationships[key];
     const name = camelizeKeys ? camelCase(key) : key;
@@ -43,7 +50,7 @@ function extractRelationships(relationships, { camelizeKeys, camelizeTypeValues 
 
     if (typeof relationship.data !== 'undefined') {
       if (isArray(relationship.data)) {
-        ret[name].data = relationship.data.map(e => ({
+        ret[name].data = relationship.data.map((e: any) => ({
           id: e.id,
           type: camelizeTypeValues ? camelCase(e.type) : e.type,
         }));
@@ -68,9 +75,9 @@ function extractRelationships(relationships, { camelizeKeys, camelizeTypeValues 
   return ret;
 }
 
-function processMeta(metaObject, { camelizeKeys }) {
+function processMeta(metaObject: any, { camelizeKeys }: NormalizeOptions): any {
   if (camelizeKeys) {
-    const meta = {};
+    const meta: any = {};
 
     keys(metaObject).forEach((key) => {
       meta[camelCase(key)] = camelizeNestedKeys(metaObject[key]);
@@ -82,8 +89,8 @@ function processMeta(metaObject, { camelizeKeys }) {
   return metaObject;
 }
 
-function extractEntities(json, { camelizeKeys, camelizeTypeValues }) {
-  const ret = {};
+function extractEntities(json: any, { camelizeKeys, camelizeTypeValues }: NormalizeOptions): any {
+  const ret: any = {};
 
   wrap(json).forEach((elem) => {
     const type = camelizeKeys ? camelCase(elem.type) : elem.type;
@@ -98,7 +105,8 @@ function extractEntities(json, { camelizeKeys, camelizeTypeValues }) {
       ret[type][elem.id].attributes = {};
 
       keys(elem.attributes).forEach((key) => {
-        ret[type][elem.id].attributes[camelCase(key)] = camelizeNestedKeys(elem.attributes[key]);
+        ret[type][elem.id].attributes[camelCase(key)]
+          = camelizeNestedKeys(elem.attributes[key]);
       });
     } else {
       ret[type][elem.id].attributes = elem.attributes;
@@ -128,16 +136,16 @@ function extractEntities(json, { camelizeKeys, camelizeTypeValues }) {
   return ret;
 }
 
-function doFilterEndpoint(endpoint) {
+function doFilterEndpoint(endpoint: string): string {
   return endpoint.replace(/\?.*$/, '');
 }
 
-function extractMetaData(json, endpoint, { camelizeKeys, camelizeTypeValues, filterEndpoint }) {
-  const ret = {};
+function extractMetaData(json: any, endpoint: string, { camelizeKeys, camelizeTypeValues, filterEndpoint }: NormalizeOptions): any {
+  const ret: any = {};
 
   ret.meta = {};
 
-  let metaObject;
+  let metaObject: any;
 
   if (!filterEndpoint) {
     const filteredEndpoint = doFilterEndpoint(endpoint);
@@ -153,10 +161,10 @@ function extractMetaData(json, endpoint, { camelizeKeys, camelizeTypeValues, fil
   metaObject.data = {};
 
   if (json.data) {
-    const meta = [];
+    const meta: Array<{id: any, type: any, relationships?: any}> = [];
 
-    wrap(json.data).forEach((object) => {
-      const pObject = {
+    wrap(json.data).forEach((object: {id: any; type: any; relationships?: any}) => {
+      const pObject: {id: any; type: any; relationships?: any} = {
         id: object.id,
         type: camelizeTypeValues ? camelCase(object.type) : object.type,
       };
@@ -186,13 +194,13 @@ function extractMetaData(json, endpoint, { camelizeKeys, camelizeTypeValues, fil
   return ret;
 }
 
-export default function normalize(json, {
+export default function normalize(json: any, {
   filterEndpoint = true,
   camelizeKeys = false,
   camelizeTypeValues = false,
   endpoint,
-} = {}) {
-  const ret = {};
+}: NormalizeOptions = {}): any {
+  const ret: any = {};
 
   if (json.data) {
     merge(ret, extractEntities(json.data, { camelizeKeys, camelizeTypeValues }));

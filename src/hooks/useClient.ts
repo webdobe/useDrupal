@@ -1,10 +1,12 @@
 // Import required libraries
 import axios, { AxiosRequestConfig } from "axios";
-import { BASEURL } from "../constants";
 import { normalize } from "../helpers";
+import { useDrupal } from "./useDrupal";
 
 // Define custom hook for API client
 export const useClient = () => {
+  const {config} = useDrupal();
+
   // Initialize client object
   let client: {
     fetch: (url: string, config?: AxiosRequestConfig) => Promise<any>;
@@ -32,9 +34,9 @@ export const useClient = () => {
    * @param {AxiosRequestConfig} [config] - Optional axios request configuration
    * @returns {Promise<any>} - The response data
    */
-  client.fetch = async (url: string, config?: AxiosRequestConfig) => {
+  client.fetch = async (url: string, RequestConfig?: AxiosRequestConfig) => {
     try {
-      const { data } = await axios.get(`${BASEURL}${url}`, config);
+      const { data } = await axios.get(`${config.baseUrl}${url}`, RequestConfig);
       return { data: normalize(data) };
     } catch(e) {
       console.log(e);
@@ -49,9 +51,9 @@ export const useClient = () => {
    * @param {AxiosRequestConfig} [config] - Optional axios request configuration
    * @returns {Promise<any>} - The response data
    */
-  client.patch = async (url: string, patchData?: any, config?: AxiosRequestConfig) => {
+  client.patch = async (url: string, patchData?: any, RequestConfig?: AxiosRequestConfig) => {
     try {
-      const { data } = await axios.patch(`${BASEURL}${url}`, patchData, config);
+      const { data } = await axios.patch(`${config.baseUrl}${url}`, patchData, RequestConfig);
       return { data: normalize(data) };
     } catch(e) {
       console.log(e);
@@ -66,9 +68,9 @@ export const useClient = () => {
    * @param {AxiosRequestConfig} [config] - Optional axios request configuration
    * @returns {Promise<any>} - The response data
    */
-  client.post = async (url: string, postData?: any, config?: AxiosRequestConfig) => {
+  client.post = async (url: string, postData?: any, RequestConfig?: AxiosRequestConfig) => {
     try {
-      const { data } = await axios.post(`${BASEURL}${url}`, postData, config);
+      const { data } = await axios.post(`${config.baseUrl}${url}`, postData, RequestConfig);
       return { data: normalize(data) };
     } catch(e) {
       console.log(e);
@@ -83,9 +85,9 @@ export const useClient = () => {
    * @param {AxiosRequestConfig} [config] - Optional axios request configuration
    * @returns {Promise<any>} - The response data
    */
-  client.delete = async (url: string, deleteData?: any, config?: AxiosRequestConfig) => {
+  client.delete = async (url: string, deleteData?: any, RequestConfig?: AxiosRequestConfig) => {
     try {
-      const { data } = await axios.delete(`${BASEURL}${url}`, { ...{data: deleteData}, ...config });
+      const { data } = await axios.delete(`${config.baseUrl}${url}`, { ...{data: deleteData}, ...RequestConfig });
       return { data: normalize(data) };
     } catch(e) {
       console.log(e);

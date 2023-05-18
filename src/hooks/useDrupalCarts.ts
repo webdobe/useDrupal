@@ -1,11 +1,31 @@
 // Import necessary libraries
-import {useEffect, useMemo, useState} from "react";
+import {useState} from "react";
 
 // Import custom hooks and utilities
 import {useCartToken} from "./useCartToken";
 import {stringify} from "../helpers";
 import {useDrupal} from "./useDrupal";
 import {useDrupalJsonApi} from "./useDrupalJsonApi";
+
+// Specify types for your line items, quantity, cartId, and lineItem.
+interface LineItem {
+  id: string;
+  type: string;
+  attributes?: Record<string, any>;
+}
+
+interface CartItem {
+  id: string;
+  type: string;
+  meta: {
+    quantity: number;
+    combine: boolean;
+  };
+}
+
+interface IApiData {
+  [key: string]: any;
+}
 
 // Define the useDrupalCarts hook with an optional orderType parameter
 export const useDrupalCarts = (orderType = "order--default") => {
@@ -38,18 +58,18 @@ export const useDrupalCarts = (orderType = "order--default") => {
     ];
 
     // Make the request and store the response
-    const { data } = await jsonApi.fetch(`/jsonapi/carts`, {
+    let response: { data?: IApiData } = await jsonApi.fetch(`/jsonapi/carts`, {
       include: includes.join(","),
     });
 
     // Update the state with the fetched data
-    if (data && data[orderType]) {
-      setDrupalState({cart: data});
+    if (response.data && response.data[orderType]) {
+      setDrupalState({cart: response.data});
     }
 
     setIsLoading(false);
 
-    return data
+    return response.data
   };
 
   // Function to get the current order object
@@ -63,10 +83,10 @@ export const useDrupalCarts = (orderType = "order--default") => {
   };
 
   // Function to add an item to the cart
-  const addToCart = async (lineItems, quantity, combine = true) => {
+  const addToCart = async (lineItems: LineItem[], quantity: number, combine = true) => {
     let cartItems = JSON.parse(stringify(lineItems));
 
-    cartItems = cartItems.map((item) => ({ ...item, meta: { quantity, combine } }));
+    cartItems = cartItems.map((item: CartItem) => ({ ...item, meta: { quantity, combine } }));
 
     await jsonApi.post(`/jsonapi/cart/add`, {
       data: cartItems,
@@ -76,7 +96,7 @@ export const useDrupalCarts = (orderType = "order--default") => {
   };
 
   // Function to modify the quantity of an item in the cart
-  const modifyItemQuantity = async (cartId, lineItem) => {
+  const modifyItemQuantity = async (cartId: string, lineItem: LineItem) => {
     let cartItem = {
       id: lineItem.id,
       type: lineItem.type,
@@ -89,7 +109,7 @@ export const useDrupalCarts = (orderType = "order--default") => {
   };
 
   // Function to delete an item from the cart
-  const deleteItem = async (cartId, lineItem) => {
+  const deleteItem = async (cartId: string, lineItem: LineItem) => {
     let cartItem = {
       data: [
         {

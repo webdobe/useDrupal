@@ -1,6 +1,9 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
-  "compilerOptions": {},
+  "compilerOptions": {
+    "jsx": "react",
+    "lib": ["dom", "es6"]
+  },
   "include": ["src"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

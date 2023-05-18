@@ -1,47 +1,59 @@
 import { useEffect, useState } from "react";
 import { useDrupalJsonApi } from "./useDrupalJsonApi";
 
-export const useDrupalSearchApi = (index, includes = [], sortBy: string = '', paging = {
+type Paging = {
+  offset: number;
+  limit: number;
+}
+
+type Params = {
+  include?: string;
+  filter?: any;
+  sort?: string;
+  page?: Paging;
+}
+
+export const useDrupalSearchApi = (index: string, includes: string[] = [], sortBy: string = '', paging: Paging = {
   offset: 0,
   limit: 10,
 }) => {
   const jsonapi = useDrupalJsonApi();
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState({});
-  const [filters, setFilters] = useState();
-  const [sort, setSort] = useState(sortBy);
-  const [page, setPage] = useState(paging);
-  const [total, setTotal] = useState(0);
+  const [data, setData] = useState<any>({});
+  const [filters, setFilters] = useState<any>();
+  const [sort, setSort] = useState<string>(sortBy);
+  const [page, setPage] = useState<Paging>(paging);
+  const [total, setTotal] = useState<number>(0);
 
   const search = async () => {
     setIsLoading(true);
 
-    let params = {};
+    let params: Params = {};
 
     if (includes && includes.length) {
-      params['include'] = includes.join(",");
+      params.include = includes.join(",");
     }
 
     if (filters) {
-      params['filter'] = filters;
+      params.filter = filters;
     }
 
     if (sort) {
-      params['sort'] = sort;
+      params.sort = sort;
     }
 
     if (page) {
-      params['page'] = page;
+      params.page = page;
     }
 
-    const response = await jsonapi.fetch(jsonapi.buildUrl(`/jsonapi/index/${index}`, params));
+    const response: any = await jsonapi.fetch(jsonapi.buildUrl(`/jsonapi/index/${index}`, params));
     setTotal(response?.meta?.count || 0);
     setData(response.data);
     setIsLoading(false);
   }
 
   useEffect(() => {
-      search();
+    search();
   }, [filters, sort, page]);
 
   return {

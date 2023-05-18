@@ -1,17 +1,26 @@
 import { useEffect, useState, useRef } from "react";
 import { useDrupalJsonApi } from "./useDrupalJsonApi";
 import { isUuid } from "../helpers";
-import DrupalEntity from "../service/DrupalEntity";
+import DrupalEntity, {IEntityData} from "../service/DrupalEntity";
 
-export const useDrupalProduct = (path, includes = []) => {
+type ProductPath = string[];
+type Includes = string[];
+
+interface Product {
+  isLoading: boolean;
+  product: DrupalEntity | null;
+  error: Error | null;
+}
+
+export const useDrupalProduct = (path: ProductPath, includes: Includes = []): Product => {
   const jsonapi = useDrupalJsonApi();
-  const [bundle, setBundle] = useState();
-  const [entity, setEntity] = useState(null)
+  const [bundle, setBundle] = useState<string | null>(null);
+  const [entity, setEntity] = useState<DrupalEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<Error | null>(null);
 
-  const createUrl = () => {
-    let url = `/jsonapi/products/${bundle}`
+  const createUrl = (): string => {
+    let url = `/jsonapi/products/${bundle}`;
 
     if (isUuid(path[1])) {
       url += `/${path[1]}${includes.length ? `?include=${includes.join(",")}` : ''}`;
@@ -23,7 +32,7 @@ export const useDrupalProduct = (path, includes = []) => {
     }
 
     return url;
-  }
+  };
 
   const load = async () => {
     setIsLoading(true);
@@ -31,26 +40,27 @@ export const useDrupalProduct = (path, includes = []) => {
 
     try {
       const url = createUrl();
-      const response = await jsonapi.fetch(url);
-      setEntity(new DrupalEntity('', `product--${bundle}`, response.data));
+      const {data} = await jsonapi.fetch(url);
+
+      setEntity(new DrupalEntity('', `product--${bundle}`, data as IEntityData));
       setIsLoading(false);
     } catch (err) {
-      setError(err);
+      setError(err as Error);
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (bundle) {
       load();
     }
-  }, [bundle])
+  }, [bundle]);
 
   useEffect(() => {
     if (path && path[0]) {
       setBundle(path[0]);
     }
-  }, [path])
+  }, [path]);
 
   return {
     isLoading,

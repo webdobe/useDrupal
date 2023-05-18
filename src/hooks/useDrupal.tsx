@@ -1,5 +1,5 @@
 // Import necessary dependencies
-import {createContext, useContext, useState, ReactNode, FC, useEffect} from "react";
+import React, {createContext, useContext, useState, ReactNode, FC, useEffect, Fragment} from "react";
 import {useDrupalUser} from "./useDrupalUser";
 import {useDrupalCarts} from "./useDrupalCarts";
 
@@ -28,13 +28,15 @@ const DrupalStateContext = createContext<DrupalState | any>(initialState);
 interface DrupalProviderProps {
   children: ReactNode;
   client: any;
+  config: any;
 }
 
 // Create a DrupalProvider component using React's Function Component (FC)
 export const DrupalProvider: FC<DrupalProviderProps> = ({
-  children,
-  client,
-}) => {
+                                                          children,
+                                                          client,
+                                                          config,
+                                                        }) => {
   // Set up the state for the DrupalState and the function to update it
   const [drupalState, _setDrupalState] = useState<DrupalState>(initialState);
 
@@ -51,7 +53,7 @@ export const DrupalProvider: FC<DrupalProviderProps> = ({
   // Return the Provider component for the DrupalStateContext
   return (
     <DrupalStateContext.Provider
-      value={{client, drupalState, setDrupalState}}
+      value={{client, config, drupalState, setDrupalState}}
     >
       {children}
     </DrupalStateContext.Provider>
@@ -78,7 +80,7 @@ export const DrupalLoadDefaults: FC<DrupalDefaultsProps> = ({children}) => {
   }, []);
 
   return (
-    <>{children}</>
+    <Fragment>{children}</Fragment>
   )
 }
 

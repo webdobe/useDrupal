@@ -1,42 +1,61 @@
-// Import necessary libraries
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import { useCartToken } from "./useCartToken";
+import { useDrupal } from "./useDrupal";
+import { useDrupalJsonApi } from "./useDrupalJsonApi";
 
-// Import custom hooks and utilities
-import {useCartToken} from "./useCartToken";
-import {useDrupal} from "./useDrupal";
-import {useDrupalJsonApi} from "./useDrupalJsonApi";
+interface IProfile {
+  // Define your profile structure here
+}
 
-// Define the useDrupalCheckout hook with an optional orderType parameter
+interface IApiData {
+  "profile--customer": IProfile[]
+}
+
+interface IErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export const useDrupalCustomerProfiles = () => {
   const cartToken = useCartToken();
-  const {drupalState, setDrupalState} = useDrupal();
+  const { drupalState, setDrupalState } = useDrupal();
   const [isLoading, setIsLoading] = useState(false);
   const jsonApi = useDrupalJsonApi({
     headers: {
       Accept: "application/vnd.api+json",
       "Content-Type": "application/vnd.api+json",
-      "Commerce-Cart-Token": cartToken,
+      "Commerce-Cart-Token": cartToken || null,
     },
   });
 
-  // Function to get customer profiles
-  const getCustomerProfiles = async () => {
+  const getCustomerProfiles = async (): Promise<IProfile[] | null> => {
     try {
       setIsLoading(true);
-      const {data} = await jsonApi.fetch(`/jsonapi/profile/customer`);
-      const profiles = (Object.values(data["profile--customer"])).map((profile) => {
+      const response: { data?: IApiData } = await jsonApi.fetch(`/jsonapi/profile/customer`);
+      if (!response.data) {
+        throw new Error("No data received from API");
+      }
+      const profiles = Object.values(response.data["profile--customer"]).map((profile) => {
         return profile;
       });
-      setDrupalState({customerProfiles: profiles});
+      setDrupalState({ customerProfiles: profiles });
       setIsLoading(false);
-      return data;
+      return profiles;
     } catch (error) {
       console.error("Error getting customer profiles data:", error);
 
-      if (error && error?.response?.data?.message) {
-        return {error: error?.response?.data?.message};
+      const responseError = error as IErrorResponse;
+      if (
+        responseError &&
+        responseError.response &&
+        responseError.response.data &&
+        responseError.response.data.message
+      ) {
+        console.error(responseError.response.data.message);
       }
-
       return null;
     }
   };
@@ -46,4 +65,4 @@ export const useDrupalCustomerProfiles = () => {
   }, []);
 
   return [isLoading, drupalState.customerProfiles];
-}
+};

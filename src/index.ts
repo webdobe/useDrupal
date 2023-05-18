@@ -1,4 +1,3 @@
-import DrupalEntity from "./service/DrupalEntity";
 import {useDrupal, DrupalProvider, DrupalLoadDefaults} from "./hooks/useDrupal";
 import {useDrupalJsonApi} from "./hooks/useDrupalJsonApi";
 import {useDrupalCartToken} from "./hooks/useDrupalCartToken";
@@ -14,9 +13,6 @@ import {useDrupalUser} from "./hooks/useDrupalUser";
 import {useDrupalCarts} from "./hooks/useDrupalCarts";
 
 export {
-  DrupalEntity,
-  DrupalProvider,
-  DrupalLoadDefaults,
   useDrupal,
   useDrupalUser,
   useDrupalCarts,
@@ -29,5 +25,7 @@ export {
   useDrupalCartToken,
   useDrupalCustomerProfiles,
   useDrupalCheckoutFlow,
-  useDrupalRestApi
+  useDrupalRestApi,
+  DrupalProvider,
+  DrupalLoadDefaults
 }

@@ -1,6 +1,6 @@
 {
   "name": "usedrupal",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "useDrupal attempts to make it easier to create a headless drupal & drupal commerce frontend using react.",
   "main": "dist/main.js",
   "scripts": {
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/webdobe/useDrupal#readme",
   "devDependencies": {
+    "@types/lodash": "^4.14.194",
     "@tsconfig/node18": "^2.0.1",
     "@types/react": "^18.2.6",
     "axios": "^1.4.0",
@@ -34,8 +35,5 @@
     "typescript": "^5.0.4",
     "webpack": "^5.83.1",
     "webpack-cli": "^5.1.1"
-  },
-  "dependencies": {
-    "@types/lodash": "^4.14.194"
   }
 }

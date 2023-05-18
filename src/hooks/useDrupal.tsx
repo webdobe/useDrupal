@@ -7,8 +7,6 @@ import {useDrupalCarts} from "./useDrupalCarts";
 interface DrupalState {
   user?: object | null;
   cart?: object | null;
-  shippingMethods?: object | null;
-  paymentGateways?: object | null;
   customerProfiles?: object | null;
 }
 
@@ -16,8 +14,6 @@ interface DrupalState {
 const initialState: DrupalState = {
   user: null,
   cart: null,
-  shippingMethods: null,
-  paymentGateways: null,
   customerProfiles: null,
 };
 

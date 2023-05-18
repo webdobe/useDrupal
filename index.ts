@@ -1,5 +1,5 @@
 import DrupalEntity from "./src/service/DrupalEntity";
-import {useDrupal} from "./src/hooks/useDrupal";
+import {useDrupal, DrupalProvider, DrupalLoadDefaults} from "./src/hooks/useDrupal";
 import {useDrupalJsonApi} from "./src/hooks/useDrupalJsonApi";
 import {useCartToken} from "./src/hooks/useCartToken";
 import {useClient} from "./src/hooks/useClient";
@@ -15,6 +15,8 @@ import {useDrupalUser} from "./src/hooks/useDrupalUser";
 
 export {
   DrupalEntity,
+  DrupalProvider,
+  DrupalLoadDefaults,
   useDrupal,
   useDrupalUser,
   useDrupalJsonApi,

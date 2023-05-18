@@ -1,6 +1,6 @@
 {
   "name": "usedrupal",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "useDrupal attempts to make it easier to create a headless drupal & drupal commerce frontend using react.",
   "main": "index.ts",
   "scripts": {

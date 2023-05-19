@@ -2,9 +2,9 @@
 import {useState} from "react";
 
 // Import custom hooks and utilities
+import useDrupal from "./useDrupal";
 import {useDrupalCartToken} from "./useDrupalCartToken";
 import {stringify} from "../helpers";
-import {useDrupal} from "./useDrupal";
 import {useDrupalJsonApi} from "./useDrupalJsonApi";
 
 // Specify types for your line items, quantity, cartId, and lineItem.

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import useDrupal from "./useDrupal";
 import { useDrupalCartToken } from "./useDrupalCartToken";
-import { useDrupal } from "./useDrupal";
+
 import { useDrupalJsonApi } from "./useDrupalJsonApi";
 
 interface IProfile {

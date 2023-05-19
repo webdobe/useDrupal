@@ -1,6 +1,6 @@
+import useDrupal from "./useDrupal";
 import { useDrupalCartToken } from "./useDrupalCartToken";
 import { getOrder } from "../helpers";
-import { useDrupal } from "./useDrupal";
 import { useDrupalJsonApi, ApiResponse } from "./useDrupalJsonApi";
 
 interface ResponseData {

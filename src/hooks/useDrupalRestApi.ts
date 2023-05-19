@@ -1,4 +1,4 @@
-import { useDrupal } from "./useDrupal";
+import useDrupal from "./useDrupal";
 
 type ClientConfig = {
   headers?: {

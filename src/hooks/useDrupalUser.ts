@@ -1,4 +1,4 @@
-import { useDrupal } from "./useDrupal";
+import useDrupal from "./useDrupal";
 import { useDrupalCsrfToken } from "./useDrupalCsrfToken";
 import { useDrupalLogoutToken } from "./useDrupalLogoutToken";
 import {ApiResponse, useDrupalJsonApi} from "./useDrupalJsonApi";

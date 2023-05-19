@@ -1,4 +1,4 @@
-import { useDrupal } from "./useDrupal";
+import useDrupal from "./useDrupal";
 import { AxiosResponse, AxiosError } from "axios";
 import { normalize } from "../helpers";
 

@@ -1,5 +1,6 @@
-export {default as DrupalEntity} from './service/DrupalEntity';
-export {useDrupal, DrupalProvider, DrupalLoadDefaults} from "./hooks/useDrupal";
+export {default as DrupalProvider} from "./DrupalProvider";
+export {default as DrupalLoadDefaults} from "./DrupalLoadDefaults";
+export {default as useDrupal} from "./hooks/useDrupal";
 export {useDrupalJsonApi} from "./hooks/useDrupalJsonApi";
 export {useDrupalCartToken} from "./hooks/useDrupalCartToken";
 export {useDrupalCsrfToken} from "./hooks/useDrupalCsrfToken";
@@ -12,4 +13,4 @@ export {useDrupalRestApi} from "./hooks/useDrupalRestApi";
 export {useDrupalSearchApi} from "./hooks/useDrupalSearchApi";
 export {useDrupalUser} from "./hooks/useDrupalUser";
 export {useDrupalCarts} from "./hooks/useDrupalCarts";
-export * from "./helpers";
+export * from "./helpers/index";

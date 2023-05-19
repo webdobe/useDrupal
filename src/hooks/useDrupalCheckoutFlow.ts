@@ -1,7 +1,8 @@
 //----------Libraries-----------//
 import {Dispatch, SetStateAction, useEffect, useState} from "react";
+import useDrupal from "./useDrupal";
 import {getOrder} from "../helpers";
-import {useDrupal} from "./useDrupal";
+
 import {useDrupalCheckout} from "./useDrupalCheckout";
 
 export interface CheckoutFlowProps {

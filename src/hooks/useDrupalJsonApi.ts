@@ -57,7 +57,7 @@ export const useDrupalJsonApi = (clientConfig: ClientConfig = {}) => {
 
   const fetch = async <T>(endpoint: string, queryParams = {}): Promise<ApiResponse<T>> => {
     try {
-      const url = queryParams ? buildUrl(endpoint, queryParams) : endpoint;
+      const url = Object.keys(queryParams).length ? buildUrl(endpoint, queryParams) : endpoint;
       const response: AxiosResponse = await client.get(`${url}`, config);
       const responseData: T = response.data;
       return { data: normalize(responseData), meta: response?.data?.meta, links: response?.data?.links };
@@ -71,7 +71,6 @@ export const useDrupalJsonApi = (clientConfig: ClientConfig = {}) => {
     try {
       const response = await client.post(`${endpoint}`, postData, config);
       const responseData: T = response.data;
-      console.log(response);
       return { data: normalize(responseData) };
     } catch(e) {
       console.log(e);
@@ -83,7 +82,6 @@ export const useDrupalJsonApi = (clientConfig: ClientConfig = {}) => {
     try {
       const response = await client.patch(`${endpoint}`, patchData, config);
       const responseData: T = response.data;
-      console.log(response);
       return { data: normalize(responseData) };
     } catch(e) {
       console.log(e);
@@ -95,7 +93,6 @@ export const useDrupalJsonApi = (clientConfig: ClientConfig = {}) => {
     try {
       const response = await client.delete(`${endpoint}`, { ...{ data: deleteData }, ...config });
       const responseData: T = response.data;
-      console.log(response);
       return { data: normalize(responseData) };
     } catch(e) {
       console.log(e);

@@ -37,7 +37,7 @@ interface Entity {
   }>;
 }
 
-const isBrowser = () => typeof window !== "undefined";
+const isBrowser = () => typeof document !== "undefined";
 
 const stringify = (obj: object): string => {
   let cache: any[] = [];

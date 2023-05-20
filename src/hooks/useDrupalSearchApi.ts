@@ -13,40 +13,27 @@ type Params = {
   page?: Paging;
 }
 
-export const useDrupalSearchApi = (index: string, includes: string[] = [], sortBy: string = '', paging: Paging = {
-  offset: 0,
-  limit: 10,
-}) => {
+const defaultParams: Params = {
+  include: '',
+  filter: {},
+  sort: '',
+  page: {
+    offset: 0,
+    limit: 10,
+  }
+};
+
+export const useDrupalSearchApi = (index: string, initialQueryParams: Params = defaultParams) => {
   const jsonapi = useDrupalJsonApi();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<any>({});
-  const [filters, setFilters] = useState<any>();
-  const [sort, setSort] = useState<string>(sortBy);
-  const [page, setPage] = useState<Paging>(paging);
   const [total, setTotal] = useState<number>(0);
+  const [queryParams, setQueryParams] = useState<Params>(initialQueryParams);
 
   const search = async () => {
     setIsLoading(true);
 
-    let params: Params = {};
-
-    if (includes && includes.length) {
-      params.include = includes.join(",");
-    }
-
-    if (filters) {
-      params.filter = filters;
-    }
-
-    if (sort) {
-      params.sort = sort;
-    }
-
-    if (page) {
-      params.page = page;
-    }
-
-    const response: any = await jsonapi.fetch(jsonapi.buildUrl(`/jsonapi/index/${index}`, params));
+    const response: any = await jsonapi.fetch(jsonapi.buildUrl(`/jsonapi/index/${index}`, queryParams));
     setTotal(response?.meta?.count || 0);
     setData(response.data);
     setIsLoading(false);
@@ -54,17 +41,13 @@ export const useDrupalSearchApi = (index: string, includes: string[] = [], sortB
 
   useEffect(() => {
     search();
-  }, [filters, sort, page]);
+  }, [queryParams]);
 
   return {
     data,
-    page,
-    setPage,
-    total,
     isLoading,
-    sort,
-    setSort,
-    filters,
-    setFilters
+    total,
+    queryParams,
+    setQueryParams,
   }
 };

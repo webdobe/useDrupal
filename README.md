@@ -23,7 +23,7 @@ yarn add use-drupal
 To use the useDrupal module, you need to import it in your ReactJS project:
 
 ```jsx
-import useDrupal from 'use-drupal';
+import { useDrupal } from 'use-drupal';
 ```
 
 The module provides several hooks that you can use to interact with Drupal's user, node, and Commerce API. These hooks provide an easy and efficient way to handle common functionality in your headless Drupal project.
@@ -33,7 +33,7 @@ Wrap your application components with the DrupalProvider component and provide t
 
 Import the necessary dependencies in your project file where you want to use the DrupalProvider component:
 ```jsx
-import DrupalProvider from 'use-drupal';
+import { DrupalProvider } from 'use-drupal';
 ```
 Wrap your application components with the DrupalProvider component and provide the required props (client and config):
 ```jsx
@@ -108,7 +108,7 @@ The DrupalEntity class is a utility class designed to facilitate working with Dr
 1. Import the `DrupalEntity` class:
 
 ```jsx
-import DrupalEntity from "./DrupalEntity";
+import { DrupalEntity } from "./DrupalEntity";
 ```
 
 Create a DrupalEntity instance

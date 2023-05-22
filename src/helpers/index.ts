@@ -210,29 +210,58 @@ const getPriceRange = (variations: any[]): Record<string, any> => {
   };
 }
 
-const parseQueryParameters = (queryString: string): Record<string, any> => {
-  const parameters = {};
-  const pairs = queryString.split('&');
+type QueryParams = Record<string, string>;
+type NestedParsedParams = Array<ParsedParams>;
+type ParsedParamValue = string | NestedParsedParams;
+type ParsedParams = Record<string, ParsedParamValue>;
 
-  pairs.forEach(pair => {
-    const [key, value] = pair.split('=');
+const splitKey = (key: string): string[] => {
+  return key.split(/\]\[|\[|\]/g).filter(Boolean); // Split keys by square brackets
+}
 
-    const path = key.split(/[[\]]{1,2}/).filter(part => part);
-    let currentObj: StringIndexedObject = parameters;
+const assignValueToPath = (path: string[], value: string, obj: any): void  => {
+  let currentLevel = obj;
 
-    path.forEach((pathPart, index) => {
-      if (index === path.length - 1) {
-        currentObj[pathPart] = decodeURIComponent(value);
-      } else {
-        if (!currentObj[pathPart]) {
-          currentObj[pathPart] = {};
-        }
-        currentObj = currentObj[pathPart];
+  for (let i = 0; i < path.length; i++) {
+    const part = path[i];
+    if (i === path.length - 1) {
+      // Last part, assign value
+      currentLevel[part] = value;
+    } else {
+      // Not last part, traverse or create object
+      if (!currentLevel[part]) {
+        currentLevel[part] = {} as any;
       }
-    });
-  });
+      currentLevel = currentLevel[part];
+    }
+  }
+}
 
-  return parameters;
+const parseQueryParams = (queryParams: QueryParams): ParsedParams => {
+  const params: ParsedParams = {};
+
+  for (let key in queryParams) {
+    const path = splitKey(key);
+    const value = queryParams[key];
+    assignValueToPath(path, value, params);
+  }
+
+  return params;
+}
+
+const getQueryParams = (): Record<string, string> => {
+  const queryParams: Record<string, string> = {};
+
+  if (isBrowser()) {
+    const queryString = window.location.search.substring(1);
+    const pairs = queryString.split('&');
+
+    for (let i = 0; i < pairs.length; i++) {
+      const pair = pairs[i].split('=');
+      queryParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+    }
+  }
+  return queryParams;
 }
 
 export {
@@ -250,5 +279,6 @@ export {
   getRelationships,
   isUuid,
   getPriceRange,
-  parseQueryParameters,
+  getQueryParams,
+  parseQueryParams,
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDrupalJsonApi } from "./useDrupalJsonApi";
+import { getQueryParams, parseQueryParams } from "../helpers";
 
 type Paging = {
   offset: number;
@@ -23,7 +24,12 @@ const defaultParams: Params = {
   }
 };
 
-export const useDrupalSearchApi = (index: string, initialQueryParams: Params = defaultParams) => {
+export const setSearchApiUrlParams = (defaultParams: Params) => {
+  const params = parseQueryParams(getQueryParams());
+  return {...defaultParams, ...params};
+}
+
+const useDrupalSearchApi = (index: string, initialQueryParams: Params = defaultParams) => {
   const jsonapi = useDrupalJsonApi();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<any>({});
@@ -51,3 +57,5 @@ export const useDrupalSearchApi = (index: string, initialQueryParams: Params = d
     setQueryParams,
   }
 };
+
+export default useDrupalSearchApi;

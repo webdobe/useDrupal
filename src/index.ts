@@ -1,3 +1,4 @@
+export {default as DrupalEntity, IEntity} from "./service/DrupalEntity";
 export {default as DrupalProvider} from "./DrupalProvider";
 export {default as DrupalLoadDefaults} from "./DrupalLoadDefaults";
 export {default as useDrupal} from "./hooks/useDrupal";
@@ -10,7 +11,7 @@ export {useDrupalCheckoutFlow} from "./hooks/useDrupalCheckoutFlow";
 export {useDrupalCustomerProfiles} from "./hooks/useDrupalCustomerProfiles";
 export {useDrupalProduct} from "./hooks/useDrupalProduct";
 export {useDrupalRestApi} from "./hooks/useDrupalRestApi";
-export {useDrupalSearchApi} from "./hooks/useDrupalSearchApi";
+export {default as useDrupalSearchApi, setSearchApiUrlParams} from "./hooks/useDrupalSearchApi";
 export {useDrupalUser} from "./hooks/useDrupalUser";
 export {useDrupalCarts} from "./hooks/useDrupalCarts";
 export * from "./helpers/index";

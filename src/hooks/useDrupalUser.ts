@@ -1,7 +1,8 @@
 import useDrupal from "./useDrupal";
 import { useDrupalCsrfToken } from "./useDrupalCsrfToken";
 import { useDrupalLogoutToken } from "./useDrupalLogoutToken";
-import {ApiResponse, useDrupalJsonApi} from "./useDrupalJsonApi";
+import useDrupalJsonApi, { JsonApiResponse } from "./useDrupalJsonApi";
+import JsonApiEntity from "../service/JsonApiEntity";
 
 interface UserResponse {
   "user--user"?: Record<string, any>
@@ -17,7 +18,7 @@ interface MetaData {
   }
 }
 
-const defaultUser = {}
+const defaultUser = {};
 
 export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_profiles']) => {
   const [, setCsrfToken] = useDrupalCsrfToken();
@@ -39,10 +40,10 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
   const setUserProfile = async (id: any) => {
     try {
       const include = includes.join(',');
-      const response: ApiResponse<UserResponse> = await jsonapi.fetch(`/jsonapi/user/user/${id}?include=${include}`);
+      const response: JsonApiResponse<UserResponse> = await jsonapi.fetch(`/jsonapi/user/user/${id}?include=${include}`);
 
       if (response.data && response.data["user--user"]) {
-        setDrupalState({ user: response.data["user--user"][id] });
+        setDrupalState({ user: new JsonApiEntity(id, "user--user", response.data) });
       }
 
       return response.data;
@@ -54,7 +55,7 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
 
   const currentUser = async () => {
     try {
-      const response: ApiResponse<{ meta: MetaData }> = await client.get(`/jsonapi`);
+      const response: JsonApiResponse<{ meta: MetaData }> = await client.get(`/jsonapi`);
       if (response.data?.meta?.links?.me?.meta?.id) {
         await setUserProfile(response.data.meta.links.me.meta.id);
       } else {

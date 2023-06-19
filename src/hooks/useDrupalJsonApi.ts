@@ -1,19 +1,21 @@
 import useDrupal from "./useDrupal";
 import { AxiosResponse, AxiosError } from "axios";
-import { normalize } from "../helpers";
+import {createUrl, getQueryParams, normalize, parseQueryParams} from "../helpers";
+import {useEffect, useState} from "react";
+import {useDrupalCsrfToken} from "./useDrupalCsrfToken";
 
 interface ClientConfig {
   headers?: any;
 }
 
-export interface ApiResponse<T = unknown> {
+export interface JsonApiResponse<T = unknown> {
   data?: T;
   meta?: any;
   links?: any;
   error?: any;
 }
 
-export interface ApiError extends Omit<AxiosError, 'response'> {
+export interface JsonApiError extends Omit<AxiosError, 'response'> {
   response?: {
     data?: {
       message: string
@@ -21,90 +23,140 @@ export interface ApiError extends Omit<AxiosError, 'response'> {
   };
 }
 
-export const useDrupalJsonApi = (clientConfig: ClientConfig = {}) => {
+export type JsonApiPaging = {
+  offset: number;
+  limit: number;
+}
+
+
+export type FilterValue = { value: string; operator: string };
+
+export type JsonApiFilterObject = {
+  [key: string]: number | string | string[] | FilterValue
+};
+
+export type JsonApiParams = {
+  fields?: string;
+  include?: string;
+  filter?: JsonApiFilterObject;
+  sort?: string;
+  page?: JsonApiPaging;
+}
+
+
+const defaultParams: JsonApiParams = {
+  filter: {},
+  fields: '',
+  include: '',
+  sort: '',
+  page: {
+    offset: 0,
+    limit: 10,
+  }
+};
+
+export const setJsonApiUrlParams = (defaultParams: JsonApiParams) => {
+  const params = parseQueryParams(getQueryParams());
+  return {...defaultParams, ...params};
+}
+
+const useDrupalJsonApi = (endpoint: string = '', initialQueryParams: JsonApiParams = defaultParams, clientConfig: ClientConfig = {}) => {
+  let controller = {
+    [endpoint]: new AbortController()
+  };
   const { client } = useDrupal();
+  const [csrfToken] = useDrupalCsrfToken();
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<any>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [queryParams, setQueryParams] = useState<JsonApiParams>(initialQueryParams);
 
   let config = {
     headers: {
       'Content-Type': 'application/vnd.api+json',
       'Accept': 'application/vnd.api+json',
+      'X-CSRF-Token': csrfToken,
     },
   };
 
-  if (clientConfig && clientConfig.headers) {
-    config = { ...config, headers: { ...config.headers, ...clientConfig.headers } };
+  if (clientConfig) {
+    config = { ...config, ...clientConfig };
   }
 
-  const buildUrl = (endpoint: string, queryParams: Record<string, any>): string => {
-    let flatParams: string[] = [];
+  const getData = async <T>(ep: string, qp = {}) => {
+    const response = await fetch(ep, qp);
+    setTotal(response.meta?.count || 0);
+    setData(response.data);
+  }
 
-    function encodePart(base: string, obj: Record<string, any>): void {
-      Object.entries(obj).forEach(([key, value]) => {
-        let newKey = base ? `${base}[${encodeURIComponent(key)}]` : encodeURIComponent(key);
-
-        if (typeof value === 'object' && value !== null) {
-          encodePart(newKey, value as Record<string, any>);
-        } else {
-          flatParams.push(`${newKey}=${encodeURIComponent(value)}`);
-        }
-      });
+  const fetch = async <T>(ep: string, qp = {}, fetchConfig = {}): Promise<JsonApiResponse<T>> => {
+    if (controller[ep]) {
+      controller[ep].abort();
     }
-
-    encodePart('', queryParams);
-
-    return `${endpoint}?${flatParams.join('&')}`;
-  };
-
-  const fetch = async <T>(endpoint: string, queryParams = {}): Promise<ApiResponse<T>> => {
+    controller[ep] = new AbortController();
     try {
-      const url = Object.keys(queryParams).length ? buildUrl(endpoint, queryParams) : endpoint;
-      const response: AxiosResponse = await client.get(`${url}`, config);
-      const responseData: T = response.data;
-      return { data: normalize(responseData), meta: response?.data?.meta, links: response?.data?.links };
+      setIsLoading(true);
+      const url = Object.keys(qp).length ? createUrl(ep, qp) : ep;
+      const getConfig = {...config, ...fetchConfig, ...{signal: controller[ep].signal}};
+      const response: AxiosResponse = await client.get(`${url}`, getConfig);
+      const normalizedData = response.data ? normalize(response.data) : {};
+      setIsLoading(false);
+      return { data: normalizedData, meta: response?.data?.meta, links: response?.data?.links };
     } catch(e) {
-      const apiError = e as ApiError;
-      return { error: apiError.response?.data || apiError };
+      throw e;
     }
   };
 
-  const post = async <T>(endpoint: string, postData: any): Promise<ApiResponse<T>> => {
+  const post = async <T>(ep: string, postData: any, postConfig = {}): Promise<JsonApiResponse<T>> => {
     try {
-      const response = await client.post(`${endpoint}`, postData, config);
+      const response = await client.post(`${ep}`, postData, { ...config, ...postConfig });
       const responseData: T = response.data;
       return { data: normalize(responseData) };
     } catch(e) {
-      console.log(e);
-      return { error: e };
+      throw e;
     }
   };
 
-  const patch = async <T>(endpoint: string, patchData: any): Promise<ApiResponse<T>> => {
+  const patch = async <T>(ep: string, patchData: any, patchConfig = {}): Promise<JsonApiResponse<T>> => {
     try {
-      const response = await client.patch(`${endpoint}`, patchData, config);
+      const response = await client.patch(`${ep}`, patchData, { ...config, ...patchConfig });
       const responseData: T = response.data;
       return { data: normalize(responseData) };
     } catch(e) {
-      console.log(e);
-      return { error: e };
+      throw e;
     }
   };
 
-  const deleteResource = async <T>(endpoint: string, deleteData: any): Promise<ApiResponse<T>> => {
+  const deleteResource = async <T>(ep: string, deleteData: any, deleteConfig = {}): Promise<JsonApiResponse<T>> => {
     try {
-      const response = await client.delete(`${endpoint}`, { ...{ data: deleteData }, ...config });
+      const response = await client.delete(`${ep}`, { ...{ data: deleteData }, ...{ ...config, ...deleteConfig } });
       const responseData: T = response.data;
       return { data: normalize(responseData) };
     } catch(e) {
-      console.log(e);
-      return { error: e };
+      throw e;
     }
   };
+
+  useEffect(() => {
+    if (endpoint) {
+      getData(endpoint, queryParams);
+    }
+    return () => {
+      controller[endpoint].abort();
+    }
+  }, [queryParams]);
 
   return {
-    buildUrl,
+    isLoading,
+    data,
+    total,
+    queryParams,
+    setQueryParams,
     fetch,
     post,
     patch,
     delete: deleteResource,
   };
 };
+
+export default useDrupalJsonApi;

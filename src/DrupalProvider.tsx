@@ -1,18 +1,17 @@
 // Import necessary dependencies
 import React, {createContext, useState, ReactNode, FC} from "react";
+import {IUseDrupalConfig} from "./hooks/useDrupal";
 
 // Define an interface for the DrupalState
 export interface IDrupalState {
   user?: object | null;
   cart?: object | null;
-  customerProfiles?: object | null;
 }
 
 // Set the initial state for the DrupalState
 export const initialState: IDrupalState = {
   user: null,
   cart: null,
-  customerProfiles: null,
 };
 
 // Create a context for the DrupalState
@@ -20,13 +19,15 @@ export const DrupalStateContext = createContext<IDrupalState | any>(initialState
 
 // Define an interface for the DrupalProviderProps
 interface DrupalProviderProps {
+  initialState?: any;
   children: ReactNode;
   client: any;
-  config: any;
+  config: IUseDrupalConfig;
 }
 
 // Create a DrupalProvider component using React's Function Component (FC)
 const DrupalProvider: FC<DrupalProviderProps> = ({
+  initialState,
   children,
   client,
   config,

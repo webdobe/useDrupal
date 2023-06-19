@@ -1,81 +1,151 @@
 import useDrupal from "./useDrupal";
+import { AxiosResponse, AxiosError } from "axios";
+import {createUrl, getQueryParams, normalize, parseQueryParams} from "../helpers";
+import {useEffect, useState} from "react";
+import {useDrupalCsrfToken} from "./useDrupalCsrfToken";
 
-type ClientConfig = {
-  headers?: {
-    'Content-Type'?: string;
-    'Accept'?: string;
+interface ClientConfig {
+  headers?: any;
+}
+
+export interface RestApiResponse<T = unknown> {
+  data?: any;
+  error?: any;
+}
+
+export interface RestApiError extends Omit<AxiosError, 'response'> {
+  response?: {
+    data?: {
+      message: string
+    };
   };
+}
+
+export type RestApiPaging = {
+  offset: number;
+  limit: number;
+}
+
+
+export type FilterValue = { value: string; operator: string };
+
+export type RestApiFilterObject = {
+  [key: string]: number | string | string[] | FilterValue
 };
 
-type User = any; // Please replace 'any' with the correct User type
+export type RestApiParams = {
+  fields?: string;
+  include?: string;
+  filter?: RestApiFilterObject;
+  sort?: string;
+  page?: RestApiPaging;
+}
 
-type DrupalClient = {
-  fetch: (url: string, config: ClientConfig) => Promise<any>;  // Replace Promise<any> with the appropriate type
-  post: (url: string, data: any, config: ClientConfig) => Promise<any>;  // Replace Promise<any> and data: any with the appropriate type
-  patch: (url: string, data: any, config: ClientConfig) => Promise<any>;  // Replace Promise<any> and data: any with the appropriate type
-  delete: (url: string, config: ClientConfig) => Promise<void>;
+
+const defaultParams: RestApiParams = {
+
 };
 
-type UseDrupalReturnType = {
-  client: DrupalClient;
-};
+export const setRestApiUrlParams = (defaultParams: RestApiParams) => {
+  const params = parseQueryParams(getQueryParams());
+  return {...defaultParams, ...params};
+}
 
-export const useDrupalRestApi = (clientConfig?: ClientConfig) => {
-  const { client } : UseDrupalReturnType = useDrupal();
+const useDrupalRestApi = (endpoint: string = '', initialQueryParams: RestApiParams = defaultParams, clientConfig: ClientConfig = {}) => {
+  let controller = {
+    [endpoint]: new AbortController()
+  };
+  const { client } = useDrupal();
+  const [csrfToken] = useDrupalCsrfToken();
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<any>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [queryParams, setQueryParams] = useState<RestApiParams>(initialQueryParams);
 
-  let config: ClientConfig = {
+  let config = {
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-    }
+      'X-CSRF-Token': csrfToken,
+    },
   };
 
   if (clientConfig) {
-    config = {...config, ...clientConfig};
+    config = { ...config, ...clientConfig };
   }
 
-  const getUser = async (userId: string) => {
+  const getData = async <T>(ep: string, qp = {}) => {
+    const response = await fetch(ep, qp);
+    setData(response.data);
+  }
+
+  const fetch = async <T>(ep: string, qp = {}, fetchConfig = {}): Promise<RestApiResponse<T>> => {
+    if (controller[ep]) {
+      controller[ep].abort();
+    }
+    controller[ep] = new AbortController();
     try {
-      const response = await client.fetch(`/user/${userId}`, config);
-      return response.data as User;  // Consider defining a specific type for the user data
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      return null;
+      setIsLoading(true);
+      const url = Object.keys(qp).length ? createUrl(ep, qp) : ep;
+      const getConfig = {...config, ...fetchConfig, ...{signal: controller[ep].signal}};
+      const response: AxiosResponse = await client.get(`${url}`, getConfig);
+      setIsLoading(false);
+      return { data: response.data };
+    } catch(e) {
+      throw e;
     }
   };
 
-  const createUser = async (userData: User) => {
+  const post = async <T>(ep: string, postData: any, postConfig = {}): Promise<RestApiResponse<T>> => {
     try {
-      const response = await client.post(`/user/register`, userData, config);
-      return response.data as User;  // Consider defining a specific type for the user data
-    } catch (error) {
-      console.error('Error creating user:', error);
-      return null;
+      const response = await client.post(`${ep}`, postData, { ...config, ...postConfig });
+      const responseData: T = response.data;
+      return { data: responseData };
+    } catch(e) {
+      throw e;
     }
   };
 
-  const updateUser = async (userId: string, userData: User) => {
+  const patch = async <T>(ep: string, patchData: any, patchConfig = {}): Promise<RestApiResponse<T>> => {
     try {
-      const response = await client.patch(`/user/${userId}`, userData, config);
-      return response.data as User;  // Consider defining a specific type for the user data
-    } catch (error) {
-      console.error('Error updating user data:', error);
-      return null;
+      const response = await client.patch(`${ep}`, patchData, { ...config, ...patchConfig });
+      const responseData: T = response.data;
+      return { data: responseData };
+    } catch(e) {
+      throw e;
     }
   };
 
-  const deleteUser = async (userId: string) => {
+  const deleteResource = async <T>(ep: string, deleteData: any, deleteConfig = {}): Promise<RestApiResponse<T>> => {
     try {
-      await client.delete(`/user/${userId}`, config);
-    } catch (error) {
-      console.error('Error deleting user:', error);
+      const response = await client.delete(`${ep}`, { ...{ data: deleteData }, ...{ ...config, ...deleteConfig } });
+      const responseData: T = response.data;
+      return { data: responseData };
+    } catch(e) {
+      throw e;
     }
   };
+
+  useEffect(() => {
+    if (endpoint) {
+      getData(endpoint, queryParams);
+    }
+    return () => {
+      controller[endpoint].abort();
+    }
+  }, [queryParams]);
 
   return {
-    getUser,
-    createUser,
-    updateUser,
-    deleteUser,
+    isLoading,
+    data,
+    total,
+    queryParams,
+    setQueryParams,
+    fetch,
+    post,
+    patch,
+    delete: deleteResource,
   };
 };
+
+export default useDrupalRestApi;

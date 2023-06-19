@@ -1,11 +1,11 @@
 // Import necessary libraries
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 // Import custom hooks and utilities
 import useDrupal from "./useDrupal";
 import {useDrupalCartToken} from "./useDrupalCartToken";
 import {stringify} from "../helpers";
-import {useDrupalJsonApi} from "./useDrupalJsonApi";
+import useDrupalJsonApi, {JsonApiParams} from "./useDrupalJsonApi";
 
 // Specify types for your line items, quantity, cartId, and lineItem.
 interface LineItem {
@@ -27,12 +27,30 @@ interface IApiData {
   [key: string]: any;
 }
 
+const defaultQueryParams = {
+  include: [
+    "uid",
+    "order_type",
+    "store_id",
+    "checkout_flow",
+    "payment_method",
+    "coupons",
+    "order_items",
+    "order_items.purchased_entity.product_variation_type",
+    "order_items.purchased_entity.product_id",
+    "order_items.purchased_entity.product_id.product_type",
+  ].join(",")
+}
+
 // Define the useDrupalCarts hook with an optional orderType parameter
-export const useDrupalCarts = (orderType = "order--default") => {
+export const useDrupalCarts = (initialOrderType?: string | null, initialQueryParams?: JsonApiParams) => {
   const cartToken = useDrupalCartToken();
-  const {drupalState, setDrupalState} = useDrupal();
+  const {config: { defaultCartQueryParams, defaultOrderType }, drupalState, setDrupalState} = useDrupal();
+  const [orderType, setOrderType] = useState(initialOrderType || defaultOrderType || "order--default");
+  const [queryParams, setQueryParams] = useState(initialQueryParams || defaultCartQueryParams || defaultQueryParams);
   const [isLoading, setIsLoading] = useState(false);
-  const jsonApi = useDrupalJsonApi({
+
+  const jsonApi = useDrupalJsonApi('', {}, {
     headers: {
       Accept: "application/vnd.api+json",
       "Content-Type": "application/vnd.api+json",
@@ -44,23 +62,8 @@ export const useDrupalCarts = (orderType = "order--default") => {
   const getCart = async () => {
     setIsLoading(true);
     // Define the include parameters for the request
-    const includes = [
-      "uid",
-      "order_type",
-      "store_id",
-      "checkout_flow",
-      "payment_method",
-      "coupons",
-      "order_items",
-      "order_items.purchased_entity.product_variation_type",
-      "order_items.purchased_entity.product_id",
-      "order_items.purchased_entity.product_id.product_type",
-    ];
-
     // Make the request and store the response
-    let response: { data?: IApiData } = await jsonApi.fetch(`/jsonapi/carts`, {
-      include: includes.join(","),
-    });
+    let response: { data?: IApiData } = await jsonApi.fetch(`/jsonapi/carts`, queryParams);
 
     // Update the state with the fetched data
     if (response.data && response.data[orderType]) {

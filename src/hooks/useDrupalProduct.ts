@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { useDrupalJsonApi } from "./useDrupalJsonApi";
+import useDrupalJsonApi from "./useDrupalJsonApi";
 import { isUuid } from "../helpers";
-import DrupalEntity, {IEntityData} from "../service/DrupalEntity";
+import DrupalEntity, {IEntityData} from "../service/JsonApiEntity";
 
 interface IProduct {
   isLoading: boolean;

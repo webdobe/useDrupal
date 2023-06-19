@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useDrupalJsonApi } from "./useDrupalJsonApi";
-import { getQueryParams, parseQueryParams } from "../helpers";
+import useDrupalJsonApi from "./useDrupalJsonApi";
+import {createUrl, getQueryParams, parseQueryParams} from "../helpers";
 
 type Paging = {
   offset: number;
@@ -29,7 +29,7 @@ export const setSearchApiUrlParams = (defaultParams: Params) => {
   return {...defaultParams, ...params};
 }
 
-const useDrupalSearchApi = (index: string, initialQueryParams: Params = defaultParams) => {
+const useDrupalSearchApi = (endpoint: string, initialQueryParams: Params = defaultParams) => {
   const jsonapi = useDrupalJsonApi();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<any>({});
@@ -39,7 +39,7 @@ const useDrupalSearchApi = (index: string, initialQueryParams: Params = defaultP
   const search = async () => {
     setIsLoading(true);
 
-    const response: any = await jsonapi.fetch(jsonapi.buildUrl(`/jsonapi/index/${index}`, queryParams));
+    const response: any = await jsonapi.fetch(createUrl(endpoint, queryParams));
     setTotal(response?.meta?.count || 0);
     setData(response.data);
     setIsLoading(false);

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import useDrupal from "./useDrupal";
 import { useDrupalCartToken } from "./useDrupalCartToken";
 
-import { useDrupalJsonApi } from "./useDrupalJsonApi";
+import useDrupalJsonApi from "./useDrupalJsonApi";
 
 interface IProfile {
   // Define your profile structure here
@@ -24,7 +24,7 @@ export const useDrupalCustomerProfiles = () => {
   const cartToken = useDrupalCartToken();
   const { drupalState, setDrupalState } = useDrupal();
   const [isLoading, setIsLoading] = useState(false);
-  const jsonApi = useDrupalJsonApi({
+  const jsonApi = useDrupalJsonApi('', {}, {
     headers: {
       Accept: "application/vnd.api+json",
       "Content-Type": "application/vnd.api+json",

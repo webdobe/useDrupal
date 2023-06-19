@@ -12,12 +12,10 @@ interface Address {
 }
 
 interface CreditCard {
-  number: string;
-  expiration: {
-    month: string;
-    year: string;
-  };
-  security_code: string;
+  number: string,
+  month: string,
+  year: string,
+  security_code: string,
 }
 
 interface BankData {
@@ -104,12 +102,12 @@ const isValidCreditCard = (card: CreditCard = {} as CreditCard): boolean => {
   // Check expiration month and year
   const currentYear = new Date().getFullYear() % 100;
   const currentMonth = new Date().getMonth() + 1;
-  const expYear = parseInt(card.expiration.year, 10);
-  const expMonth = parseInt(card.expiration.month, 10);
+  const expYear = parseInt(card.year, 10);
+  const expMonth = parseInt(card.month, 10);
 
   if (
-    !monthRegex.test(card.expiration.month) ||
-    !yearRegex.test(card.expiration.year) ||
+    !monthRegex.test(card.month) ||
+    !yearRegex.test(card.year) ||
     expYear < currentYear ||
     (expYear === currentYear && expMonth < currentMonth)
   ) {
@@ -142,6 +140,13 @@ function isValidBankData(bankData: BankData = {} as BankData): boolean {
   if (!accountTypeRegex.test(bankData.account_type)) return false;
 
   return true;
+}
+
+function isValidPhoneNumber(phoneNumber: string, areaCodeRequired: boolean = true): boolean {
+  const regex = areaCodeRequired
+    ? /^(\+1\s?)?(\([0-9]{3}\)|[0-9]{3})[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$/
+    : /^(\+1\s?)?((\([0-9]{3}\)|[0-9]{3})[\s.-]?)?[0-9]{3}[\s.-]?[0-9]{4}$/;
+  return regex.test(phoneNumber);
 }
 
 const toCamelCase = (str: string): string => {
@@ -210,6 +215,26 @@ const getPriceRange = (variations: any[]): Record<string, any> => {
   };
 }
 
+const createUrl = (endpoint: string, queryParams: Record<string, any>): string => {
+  let flatParams: string[] = [];
+
+  function encodePart(base: string, obj: Record<string, any>): void {
+    Object.entries(obj).forEach(([key, value]) => {
+      let newKey = base ? `${base}[${encodeURIComponent(key)}]` : encodeURIComponent(key);
+
+      if (typeof value === 'object' && value !== null) {
+        encodePart(newKey, value as Record<string, any>);
+      } else {
+        flatParams.push(`${newKey}=${encodeURIComponent(value)}`);
+      }
+    });
+  }
+
+  encodePart('', queryParams);
+
+  return `${endpoint}?${flatParams.join('&')}`;
+};
+
 type QueryParams = Record<string, string>;
 type NestedParsedParams = Array<ParsedParams>;
 type ParsedParamValue = string | NestedParsedParams;
@@ -250,6 +275,7 @@ const parseQueryParams = (queryParams: QueryParams): ParsedParams => {
 }
 
 const getQueryParams = (): Record<string, string> => {
+  const filterParams = ["filter", "page", "sort", "include", "fields"];
   const queryParams: Record<string, string> = {};
 
   if (isBrowser()) {
@@ -258,11 +284,67 @@ const getQueryParams = (): Record<string, string> => {
 
     for (let i = 0; i < pairs.length; i++) {
       const pair = pairs[i].split('=');
-      queryParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+      const key = decodeURIComponent(pair[0]);
+      const value = decodeURIComponent(pair[1] || '');
+
+      // Check if key starts with any string in the filterParams array
+      if (filterParams.some(param => key.startsWith(param)) && value) {
+        queryParams[key] = value;
+      }
     }
   }
   return queryParams;
+};
+
+interface FilterCondition {
+  path: string;
+  operator: string;
+  value: string;
+  memberOf?: string;
 }
+
+interface FilterGroup {
+  conjunction?: "AND" | "OR";
+}
+
+interface FilterObject {
+  condition?: FilterCondition;
+  group?: FilterGroup;
+}
+
+const createFilterObject = (
+  filterName: string,
+  path: string,
+  operator: string,
+  value: string,
+  memberOf?: string,
+  conjunction?: "AND" | "OR"
+): { [key: string]: FilterObject } => {
+  let filterObject: { [key: string]: FilterObject } = {
+    [filterName]: {
+      condition: {
+        path: path,
+        operator: operator,
+        value: value,
+      },
+    },
+  };
+
+  if (memberOf) {
+    filterObject[filterName].condition!.memberOf = memberOf;
+  }
+
+  if (conjunction) {
+    const group: FilterGroup = { conjunction: conjunction };
+    if (memberOf && !(memberOf in filterObject)) {
+      filterObject[memberOf] = { group: group };
+    } else {
+      filterObject[filterName].group = group;
+    }
+  }
+
+  return filterObject;
+};
 
 export {
   normalize,
@@ -272,6 +354,7 @@ export {
   isAddressDirty,
   isValidCreditCard,
   isValidBankData,
+  isValidPhoneNumber,
   toCamelCase,
   getOrder,
   getLastFourDigits,
@@ -279,6 +362,8 @@ export {
   getRelationships,
   isUuid,
   getPriceRange,
+  createUrl,
   getQueryParams,
   parseQueryParams,
+  createFilterObject,
 }

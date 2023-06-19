@@ -30,6 +30,7 @@
   "homepage": "https://github.com/webdobe/useDrupal#readme",
   "devDependencies": {
     "@types/lodash": "^4.14.194",
+    "@types/react": "^18.2.13",
     "axios": "^1.4.0",
     "lodash": "^4.17.21",
     "ts-loader": "^9.4.2",

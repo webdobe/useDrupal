@@ -28,11 +28,12 @@ export type JsonApiPaging = {
   limit: number;
 }
 
-
 export type FilterValue = { value: string; operator: string };
+export type GroupConjunction = { group: { conjunction: string } };
+export type Condition = { condition: { operator: string; value: string; path: string; memberOf?: string } };
 
 export type JsonApiFilterObject = {
-  [key: string]: number | string | string[] | FilterValue
+  [key: string]: number | string | string[] | FilterValue | GroupConjunction | Condition
 };
 
 export type JsonApiParams = {

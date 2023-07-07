@@ -36,8 +36,12 @@ export type JsonApiFilterObject = {
   [key: string]: number | string | string[] | FilterValue | GroupConjunction | Condition
 };
 
+export type JsonApiFieldsObject = {
+  [key: string]: string
+};
+
 export type JsonApiParams = {
-  fields?: string;
+  fields?: string | JsonApiFieldsObject;
   include?: string;
   filter?: JsonApiFilterObject;
   sort?: string;

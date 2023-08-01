@@ -8,16 +8,17 @@ export interface CheckoutFlowProps {
 }
 
 export interface CheckoutFlow {
+  orderId: string;
   currentStep: string;
   setStep: Dispatch<SetStateAction<string>>;
   nextStep: () => void;
   prevStep: () => void;
 }
 
-export const useDrupalCheckoutFlow = (checkoutFlow: CheckoutFlowProps[], path: string = "/checkout"): CheckoutFlow => {
+export const useDrupalCheckoutFlow = (checkoutFlow: CheckoutFlowProps[], id: string = '', path: string = "/checkout"): CheckoutFlow => {
   const {drupalState: {user, cart}} = useDrupal();
   const [step, setStep] = useState<string>(checkoutFlow[0].step);
-  const [orderId, setOrderId] = useState<string>("");
+  const [orderId, setOrderId] = useState<string>(id);
 
   const prev = () => {
     const index = checkoutFlow.findIndex((f) => f.step === step) - 1;
@@ -49,8 +50,9 @@ export const useDrupalCheckoutFlow = (checkoutFlow: CheckoutFlowProps[], path: s
 
   // Update url once we have the step and order id.
   useEffect(() => {
-    if (step && orderId) {
-      history.pushState({}, "", `${path}/${orderId}/${step}`);
+    const newPath = `${path}/${orderId}/${step}`;
+    if (step && orderId && window.location.pathname !== newPath) {
+      window.location.href = newPath;
     }
   }, [step, orderId]);
 
@@ -63,6 +65,7 @@ export const useDrupalCheckoutFlow = (checkoutFlow: CheckoutFlowProps[], path: s
   }, [user, cart]);
 
   return {
+    orderId: orderId,
     currentStep: step,
     setStep: setStep,
     nextStep: next,

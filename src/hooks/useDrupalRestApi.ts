@@ -62,13 +62,16 @@ const useDrupalRestApi = (endpoint: string = '', initialQueryParams: RestApiPara
   const [total, setTotal] = useState<number>(0);
   const [queryParams, setQueryParams] = useState<RestApiParams>(initialQueryParams);
 
-  let config = {
+  let config: any = {
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-CSRF-Token': csrfToken,
     },
   };
+
+  if (csrfToken) {
+    config.headers['X-CSRF-Token'] = csrfToken;
+  }
 
   if (clientConfig) {
     config = { ...config, ...clientConfig };

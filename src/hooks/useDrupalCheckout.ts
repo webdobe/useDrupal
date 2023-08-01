@@ -15,7 +15,7 @@ interface DrupalResponse<T = unknown> extends JsonApiResponse<T> {
 
 type PatchData = { [key: string]: any };
 
-const defaultQueryParams = {
+const defaultCheckoutParams = {
   include: [
     "uid",
     "order_type",
@@ -30,10 +30,25 @@ const defaultQueryParams = {
   ].join(",")
 }
 
-export const useDrupalCheckout = (initialQueryParams?: JsonApiParams) => {
+const defaultPaymentParams = {
+  include: [
+    "payment_gateway",
+    "payment_method",
+    "order_id",
+    "order_id.store_id",
+    "order_id.coupons",
+    "order_id.order_items",
+    "order_id.order_items.purchased_entity.product_variation_type",
+    "order_id.order_items.purchased_entity.product_id",
+    "order_id.order_items.purchased_entity.product_id.product_type",
+  ].join(",")
+}
+
+export const useDrupalCheckout = (initialCheckoutParams?: JsonApiParams, initialPaymentParams?: JsonApiParams) => {
   const cartToken = useDrupalCartToken();
-  const {config: { defaultCartQueryParams }, drupalState: { cart }, setDrupalState} = useDrupal();
-  const [queryParams] = useState(initialQueryParams || defaultCartQueryParams || defaultQueryParams);
+  const {config: { defaultCheckoutQueryParams, defaultPaymentQueryParams }, drupalState: { cart }, setDrupalState} = useDrupal();
+  const [checkoutParams] = useState(initialCheckoutParams || defaultCheckoutQueryParams || defaultCheckoutParams);
+  const [paymentParams] = useState(initialPaymentParams || defaultPaymentQueryParams || defaultPaymentParams);
   const jsonApi = useDrupalJsonApi('', {}, {
     headers: {
       Accept: "application/vnd.api+json",
@@ -45,7 +60,7 @@ export const useDrupalCheckout = (initialQueryParams?: JsonApiParams) => {
   const startCheckout = async (): Promise<DrupalResponse> => {
     try {
       const order = getOrder(cart);
-      const response = await jsonApi.fetch(`/jsonapi/checkout/${order.id}`, queryParams);
+      const response = await jsonApi.fetch(`/jsonapi/checkout/${order.id}`, checkoutParams);
 
       if (response && response.data) {
         setDrupalState({ cart: response.data });
@@ -60,7 +75,7 @@ export const useDrupalCheckout = (initialQueryParams?: JsonApiParams) => {
   const updateCheckout = async (patchData: PatchData): Promise<DrupalResponse> => {
     try {
       const order = getOrder(cart);
-      const response = await jsonApi.patch(createUrl(`/jsonapi/checkout/${order.id}`, queryParams), { data: patchData });
+      const response = await jsonApi.patch(createUrl(`/jsonapi/checkout/${order.id}`, checkoutParams), { data: patchData });
 
       if (response && response.data) {
         setDrupalState({ cart: response.data });
@@ -72,20 +87,17 @@ export const useDrupalCheckout = (initialQueryParams?: JsonApiParams) => {
     }
   };
 
-  const placeOrder = async (): Promise<DrupalResponse> => {
+  const placeOrder = async (paymentType: string = 'payment--acceptjs'): Promise<DrupalResponse> => {
     try {
       const order = getOrder(cart);
-
-      const response = await jsonApi.post(`/jsonapi/checkout/${order.id}/payment`, {
+      const response = await jsonApi.post(createUrl(`/jsonapi/checkout/${order.id}/payment`, paymentParams), {
         data: {
-          type: 'payment--acceptjs',
+          type: paymentType,
           attributes: {
             capture: true
           }
         }
       });
-
-      console.log(response);
 
       if (response && response.data) {
         setDrupalState({ cart: response.data });

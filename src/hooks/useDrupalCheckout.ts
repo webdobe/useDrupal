@@ -76,11 +76,7 @@ export const useDrupalCheckout = (initialCheckoutParams?: JsonApiParams, initial
     try {
       const order = getOrder(cart);
       const response = await jsonApi.patch(createUrl(`/jsonapi/checkout/${order.id}`, checkoutParams), { data: patchData });
-
-      if (response && response.data) {
-        setDrupalState({ cart: response.data });
-      }
-
+      await startCheckout();
       return response;
     } catch (error) {
       return { error: error instanceof Error ? error : new Error("An error occurred updating checkout.") };

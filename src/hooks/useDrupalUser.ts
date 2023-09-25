@@ -119,6 +119,32 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
   };
 
+  const lostPassword = async (userData: any) => {
+    try {
+      const response = await client.post(`/user/lost-password?_format=json`, userData, config);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error resetting user password:', error);
+      if (error && error?.response?.data?.message) {
+        return { error: error?.response?.data?.message}
+      }
+      return null;
+    }
+  };
+
+  const lostPasswordReset = async (userData: any) => {
+    try {
+      const response = await client.post(`/user/lost-password-reset?_format=json`, userData, config);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error resetting user password:', error);
+      if (error && error?.response?.data?.message) {
+        return { error: error?.response?.data?.message}
+      }
+      return null;
+    }
+  };
+
   const updateUser = async (userId: string, userData: any) => {
     try {
       const response = await client.patch(`/user/${userId}?_format=json`, userData, config);
@@ -145,6 +171,8 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     createUser,
     updateUser,
     resetPassword,
+    lostPassword,
+    lostPasswordReset,
     deleteUser,
   };
 };

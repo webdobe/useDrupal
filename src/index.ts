@@ -1,5 +1,7 @@
 export {default as JsonApiEntity} from "./service/JsonApiEntity";
 export type {IEntity, IEntityData} from "./service/JsonApiEntity";
+export {default as LocalStorage} from "./service/StorageManager";
+export type {StorageManager} from "./service/StorageManager";
 export {default as DrupalProvider} from "./DrupalProvider";
 export {default as DrupalLoadDefaults} from "./DrupalLoadDefaults";
 export {default as useDrupal} from "./hooks/useDrupal";

@@ -1,6 +1,7 @@
 // Import necessary dependencies
 import React, {createContext, useState, ReactNode, FC} from "react";
 import {IUseDrupalConfig} from "./hooks/useDrupal";
+import {LocalStorage} from "./index";
 
 // Define an interface for the DrupalState
 export interface IDrupalState {
@@ -22,6 +23,7 @@ interface DrupalProviderProps {
   initialState?: any;
   children: ReactNode;
   client: any;
+  storage: StorageManager;
   config: IUseDrupalConfig;
 }
 
@@ -30,6 +32,7 @@ const DrupalProvider: FC<DrupalProviderProps> = ({
   initialState,
   children,
   client,
+  storage,
   config,
 }) => {
   // Set up the state for the DrupalState and the function to update it
@@ -45,10 +48,12 @@ const DrupalProvider: FC<DrupalProviderProps> = ({
     });
   };
 
+  const storageManager = storage ? storage : new LocalStorage();
+
   // Return the Provider component for the DrupalStateContext
   return (
     <DrupalStateContext.Provider
-      value={{client, config, drupalState, setDrupalState}}
+      value={{client, config, drupalState, setDrupalState, storage: storageManager}}
     >
       {children}
     </DrupalStateContext.Provider>

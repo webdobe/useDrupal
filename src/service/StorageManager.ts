@@ -1,8 +1,8 @@
 export interface StorageManager {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-  removeItem(key: string): void;
-  clear(): void;
+  getItem(key: string): Promise<string | null>;
+  setItem(key: string, value: string): Promise<void>;
+  removeItem(key: string): Promise<void>;
+  clear(): Promise<void>;
 }
 
 class LocalStorageManager implements StorageManager {
@@ -22,7 +22,7 @@ class LocalStorageManager implements StorageManager {
   }
 
   // Get an item from localStorage
-  getItem(key: string): string | null {
+  async getItem(key: string): Promise<string | null> {
     if (LocalStorageManager.isLocalStorageSupported()) {
       return localStorage.getItem(key);
     }
@@ -30,21 +30,21 @@ class LocalStorageManager implements StorageManager {
   }
 
   // Set an item in localStorage
-  setItem(key: string, value: string): void {
+  async setItem(key: string, value: string): Promise<void> {
     if (LocalStorageManager.isLocalStorageSupported()) {
       localStorage.setItem(key, value);
     }
   }
 
   // Remove an item from localStorage
-  removeItem(key: string): void {
+  async removeItem(key: string): Promise<void> {
     if (LocalStorageManager.isLocalStorageSupported()) {
       localStorage.removeItem(key);
     }
   }
 
   // Clear all items in localStorage
-  clear(): void {
+  async clear(): Promise<void> {
     if (LocalStorageManager.isLocalStorageSupported()) {
       localStorage.clear();
     }

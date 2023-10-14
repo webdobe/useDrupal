@@ -71,8 +71,8 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
   const login = async (loginData: any) => {
     try {
       const response = await client.post(`/user/login?_format=json`, loginData, config);
-      setCsrfToken(response?.data?.csrf_token);
-      setLogoutToken(response?.data?.logout_token);
+      await setCsrfToken(response?.data?.csrf_token);
+      await setLogoutToken(response?.data?.logout_token);
       await currentUser();
       return response;
     } catch (error: any) {
@@ -94,8 +94,8 @@ export const useDrupalUser = (clientConfig = {}, includes = ['roles', 'customer_
     }
 
     // Logout regardless on frontend.
-    setCsrfToken(null as unknown as string);
-    setLogoutToken(null as unknown as string);
+    await setCsrfToken(null as unknown as string);
+    await setLogoutToken(null as unknown as string);
     setDrupalState({ user: null, cart: null });
   }
 

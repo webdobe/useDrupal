@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react";
-import {isBrowser} from "../helpers";
+import { isBrowser } from "../helpers";
 import useDrupal from "./useDrupal";
 
 export const useDrupalLogoutToken = () => {
-  const {storage} = useDrupal();
+  const { storage } = useDrupal();
   const [logoutToken, _setLogoutToken] = useState<string>('');
 
-  const setLogoutToken = (token: string | null | undefined) => {
+  const setLogoutToken = async (token: string | null | undefined) => {
     const finalToken = token ?? '';
-    storage.setItem("logoutToken", finalToken);
+    await storage.setItem("logoutToken", finalToken); // Await here
     _setLogoutToken(finalToken);
   }
 
   useEffect(() => {
-    if (isBrowser()) {
-      let token = storage.getItem("logoutToken");
-      setLogoutToken(token);
-    }
-  }, []);
+    const getLogoutToken = async () => {
+      if (isBrowser()) {
+        let token = await storage.getItem("logoutToken"); // Await here
+        await setLogoutToken(token); // Await here
+      }
+    };
+
+    getLogoutToken();
+  }, [storage]);
 
   return [logoutToken, setLogoutToken] as const;
 };
+
+
 

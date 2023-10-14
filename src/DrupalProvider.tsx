@@ -23,7 +23,7 @@ interface DrupalProviderProps {
   initialState?: any;
   children: ReactNode;
   client: any;
-  storage: StorageManager;
+  storage?: StorageManager;
   config: IUseDrupalConfig;
 }
 

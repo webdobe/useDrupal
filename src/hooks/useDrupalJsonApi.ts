@@ -3,6 +3,7 @@ import { AxiosResponse, AxiosError } from "axios";
 import {createUrl, getQueryParams, normalize, parseQueryParams} from "../helpers";
 import {useEffect, useState} from "react";
 import {useDrupalCsrfToken} from "./useDrupalCsrfToken";
+import merge from "lodash/merge";
 
 interface ClientConfig {
   headers?: any;
@@ -85,7 +86,7 @@ const useDrupalJsonApi = (endpoint: string = '', initialQueryParams: JsonApiPara
   };
 
   if (clientConfig) {
-    config = { ...config, ...clientConfig };
+    merge(config, clientConfig);
   }
 
   const getData = async <T>(ep: string, qp = {}) => {
@@ -114,7 +115,7 @@ const useDrupalJsonApi = (endpoint: string = '', initialQueryParams: JsonApiPara
 
   const post = async <T>(ep: string, postData: any, postConfig = {}): Promise<JsonApiResponse<T>> => {
     try {
-      const response = await client.post(`${ep}`, postData, { ...config, ...postConfig });
+      const response = await client.post(`${ep}`, postData, merge({}, config, postConfig));
       const responseData: T = response.data;
       return { data: normalize(responseData) };
     } catch(e) {
@@ -124,7 +125,7 @@ const useDrupalJsonApi = (endpoint: string = '', initialQueryParams: JsonApiPara
 
   const patch = async <T>(ep: string, patchData: any, patchConfig = {}): Promise<JsonApiResponse<T>> => {
     try {
-      const response = await client.patch(`${ep}`, patchData, { ...config, ...patchConfig });
+      const response = await client.patch(`${ep}`, patchData, merge({}, config, patchConfig));
       const responseData: T = response.data;
       return { data: normalize(responseData) };
     } catch(e) {
@@ -134,7 +135,8 @@ const useDrupalJsonApi = (endpoint: string = '', initialQueryParams: JsonApiPara
 
   const deleteResource = async <T>(ep: string, deleteData: any, deleteConfig = {}): Promise<JsonApiResponse<T>> => {
     try {
-      const response = await client.delete(`${ep}`, { ...{ data: deleteData }, ...{ ...config, ...deleteConfig } });
+      const alteredConfig = merge({}, config, deleteConfig);
+      const response = await client.delete(`${ep}`, { ...{ data: deleteData }, ...alteredConfig });
       const responseData: T = response.data;
       return { data: normalize(responseData) };
     } catch(e) {

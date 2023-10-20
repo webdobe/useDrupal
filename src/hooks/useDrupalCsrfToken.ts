@@ -13,11 +13,9 @@ export const useDrupalCsrfToken = () => {
 
   useEffect(() => {
     const getCsrfToken = async () => {
-      if (isBrowser()) {
-        let token: string | null = await storage.getItem("csrfToken"); // Await here
-        if (token !== null) {
-          await setCsrfToken(token); // Await here
-        }
+      let token: string | null = await storage.getItem("csrfToken"); // Await here
+      if (token !== null) {
+        await setCsrfToken(token); // Await here
       }
     };
 

@@ -1,6 +1,6 @@
 {
   "name": "use-drupal",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "description": "useDrupal attempts to make it easier to create a headless drupal & drupal commerce frontend using react.",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",

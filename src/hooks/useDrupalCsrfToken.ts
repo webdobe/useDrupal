@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { isBrowser } from "../helpers";
 import useDrupal from "./useDrupal";
 
 export const useDrupalCsrfToken = () => {
   const { storage } = useDrupal();
   const [csrfToken, _setCsrfToken] = useState<string>('');
 
-  const setCsrfToken = async (token: string) => {
-    await storage.setItem("csrfToken", token); // Await here
-    _setCsrfToken(token);
+  const setCsrfToken = async (token: string | null | undefined) => {
+    const finalToken = token ?? '';
+    await storage.setItem("csrfToken", finalToken); // Await here
+    _setCsrfToken(finalToken);
   };
 
   useEffect(() => {

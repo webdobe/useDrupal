@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { isBrowser } from "../helpers";
 import useDrupal from "./useDrupal";
 
 export const useDrupalLogoutToken = () => {
@@ -14,8 +13,8 @@ export const useDrupalLogoutToken = () => {
 
   useEffect(() => {
     const getLogoutToken = async () => {
-      if (isBrowser()) {
-        let token = await storage.getItem("logoutToken"); // Await here
+      let token: string | null = await storage.getItem("logoutToken"); // Await here
+      if (token !== null) {
         await setLogoutToken(token); // Await here
       }
     };

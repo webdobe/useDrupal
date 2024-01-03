@@ -107,11 +107,20 @@ class JsonApiEntity {
     return this._data;
   }
 
+  // Getter for values;
+  get values() {
+    if(this.data && this.type && this.id && (this.data as IEntityData)?.[this.type]?.[this.id]) {
+      const entity: IEntity = (this.data as IEntityData)[this.type][this.id];
+      return entity;
+    }
+    return undefined;
+  }
+
   /**
    * The getEntityByType method is used to update the id and type of the current entity based on its type.
    */
   getEntityByType () {
-    if(this.data && this.type && (this.data as IEntityData)[this.type]) {
+    if(this.data && this.type && (this.data as IEntityData)?.[this.type]) {
       const entity: IEntity = Object.values((this.data as IEntityData)[this.type])[this._index] as IEntity;
       if (entity) {
         this.id = entity.id;
@@ -124,7 +133,7 @@ class JsonApiEntity {
    * The getValue method is used to retrieve the value of a given attribute or relationship.
    */
   getValue(value: string): any {
-    if(this.data && this.type && this.id && (this.data as IEntityData)[this.type][this.id]) {
+    if(this.data && this.type && this.id && (this.data as IEntityData)?.[this.type]?.[this.id]) {
       const entity: IEntity = (this.data as IEntityData)[this.type][this.id];
       if (entity) {
         if (entity.attributes && entity.attributes[value] !== undefined) {
@@ -138,10 +147,24 @@ class JsonApiEntity {
   }
 
   /**
+   * The getValue method is used to retrieve the value of a given attribute or relationship.
+   */
+  setValue(attribute: string, value: any): any {
+    if(this.data && this.type && this.id && (this.data as IEntityData)?.[this.type]?.[this.id]) {
+      const entity: IEntity = (this.data as IEntityData)[this.type][this.id];
+      if (entity) {
+        const data = JSON.parse(JSON.stringify(this.data));
+        data[this.type][this.id]['attributes'][attribute] = value;
+        this.data = data;
+      }
+    }
+  }
+
+  /**
    * The getRelationship method is used to retrieve a relationship as a DrupalEntity or an array of DrupalEntities.
    */
   getRelationship(value: string): JsonApiEntity | JsonApiEntity[] | undefined {
-    if(this.data && this.type && this.id && (this.data as IEntityData)[this.type][this.id]) {
+    if(this.data && this.type && this.id && (this.data as IEntityData)?.[this.type]?.[this.id]) {
       const entity: IEntity = (this.data as IEntityData)[this.type][this.id];
       if (entity && entity.relationships && entity.relationships[value]?.data) {
         const relationshipData = entity.relationships[value].data;
@@ -161,7 +184,7 @@ class JsonApiEntity {
    * The getMeta method is used to retrieve the value of a given meta data.
    */
   getMeta(value: string): any {
-    if(this.data && this.type && this.id && (this.data as IEntityData)[this.type][this.id]) {
+    if(this.data && this.type && this.id && (this.data as IEntityData)?.[this.type]?.[this.id]) {
       const entity: IEntity = (this.data as IEntityData)[this.type][this.id];
       if (entity && entity.meta && entity.meta[value]) {
         return entity.meta[value];

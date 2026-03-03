@@ -28,13 +28,13 @@ interface DrupalProviderProps {
 }
 
 // Create a DrupalProvider component using React's Function Component (FC)
-const DrupalProvider: FC<DrupalProviderProps> = ({
+const DrupalProvider = ({
   initialState,
   children,
   client,
   storage,
   config,
-}) => {
+}: DrupalProviderProps) => {
   // Set up the state for the DrupalState and the function to update it
   const [drupalState, _setDrupalState] = useState<IDrupalState>(initialState);
 

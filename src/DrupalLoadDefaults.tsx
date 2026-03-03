@@ -8,7 +8,7 @@ interface DrupalDefaultsProps {
 }
 
 // Create a component wrapper to load default data.
-const DrupalLoadDefaults: FC<DrupalDefaultsProps> = ({children}) => {
+const DrupalLoadDefaults = ({children}: DrupalDefaultsProps) => {
   const {drupalState: {user, cart}} = useDrupal();
   const {currentUser} = useDrupalUser();
   const {getCart} = useDrupalCarts();

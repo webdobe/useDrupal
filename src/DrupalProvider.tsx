@@ -57,7 +57,7 @@ const DrupalProvider = ({
     >
       {children}
     </DrupalStateContext.Provider>
-  ) as React.ReactElement;
+  );
 };
 
 export default DrupalProvider;

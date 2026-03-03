@@ -33,7 +33,6 @@
     "@types/react": "^18.2.13",
     "axios": "^1.4.0",
     "lodash": "^4.17.21",
-    "ts-loader": "^9.4.2",
     "typescript": "^5.0.4"
   },
   "peerDependencies": {

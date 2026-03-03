@@ -22,9 +22,7 @@ const DrupalLoadDefaults = ({children}: DrupalDefaultsProps) => {
     }
   }, []);
 
-  return (
-    <Fragment>{children}</Fragment>
-  )
+  return children as React.ReactElement;
 }
 
 export default DrupalLoadDefaults;

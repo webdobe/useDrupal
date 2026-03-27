@@ -1,5 +1,5 @@
 import useDrupal from "./useDrupal";
-import { AxiosResponse, AxiosError } from "axios";
+import axios, { AxiosResponse, AxiosError } from "axios";
 import {createUrl, getQueryParams, normalize, parseQueryParams} from "../helpers";
 import {useEffect, useState} from "react";
 import {useDrupalCsrfToken} from "./useDrupalCsrfToken";
@@ -102,13 +102,19 @@ const useDrupalJsonApi = (endpoint: string = '', initialQueryParams: JsonApiPara
     controller[ep] = new AbortController();
     try {
       setIsLoading(true);
-      const url = Object.keys(qp).length ? createUrl(ep, qp) : ep;
+      let url = Object.keys(qp).length ? createUrl(ep, qp) : ep;
+      url = decodeURIComponent(url);
       const getConfig = {...config, ...fetchConfig, ...{signal: controller[ep].signal}};
       const response: AxiosResponse = await client.get(`${url}`, getConfig);
+      console.log(response);
       const normalizedData = response.data ? normalize(response.data) : {};
       setIsLoading(false);
       return { data: normalizedData, meta: response?.data?.meta, links: response?.data?.links };
     } catch(e) {
+      if (axios.isCancel(e)) {
+        return {} as JsonApiResponse<T>;
+      }
+      console.log(e);
       throw e;
     }
   };

@@ -163,8 +163,20 @@ export const useDrupalCheckout = (initialCheckoutParams?: JsonApiParams, initial
       }
 
       return response;
-    } catch (error) {
-      return { error: error instanceof Error ? error : new Error("An error occurred placing order.") };
+    } catch (error: any) {
+      // Extract error message from JSON:API response if available
+      const apiErrors = error?.response?.data?.errors;
+      let errorMessage = "An error occurred placing order.";
+      if (apiErrors && Array.isArray(apiErrors) && apiErrors.length > 0) {
+        errorMessage = apiErrors.map((e: any) => e.detail || e.title || e.message).filter(Boolean).join('; ');
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      const wrappedError = new Error(errorMessage);
+      return { error: wrappedError };
     }
   };
 
